@@ -11,9 +11,20 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from DataFormats.FWLite import Events, Handle
 
-def runOverNtuple(ntuple, output):
+# Used so trees from multiple versions do not get hadd'd together.
+version = "0.1_alpha"
+
+def runOverNtuple(ntuple, outputDir):
+	outputName = os.path.join(outputDir, ntuple.rpartition("/"))
+	print outputName
+	output = ROOT.TFile(outputName, "RECREATE")
+	tree = ROOT.TTree("tree_" + version, "tree_" + version)
+
 	for event in Events(ntuple):
-		
+		pass
+
+	tree.Write()
+	output.Close()
 
 def runTreemaker(directory, name=""):
 	print "*** Running treemaker over " + directory
@@ -38,11 +49,13 @@ def runTreemaker(directory, name=""):
 			for ntuple in files:
 				pool.apply_async(runOverNtuple, (os.path.join(path, ntuple), outputDir,))
 
-	pool.join()
-	# For now use os.system:
-	os.system("hadd " + name + " " + outputDir + "/*")
+#	pool.close()
+#	pool.join()
 
-	shutil.rmtree(outputDir)
+	# For now use os.system:
+#	os.system("hadd -m " + name + " " + outputDir + "/*")
+
+#	shutil.rmtree(outputDir)
 
 def main():
 	parser = optparse.OptionParser()
