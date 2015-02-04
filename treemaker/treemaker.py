@@ -93,7 +93,7 @@ def runOverNtuple(ntuple, outputDir, jets):
 	output.Close()
 	print "**** Finished processing ntuple."
 
-def runTreemaker(directory, jets, force=False, name=""):
+def runTreemaker(directory, jets, force=False, name="", linear=False):
 	print "*** Running treemaker over " + directory
 	if name == "":
 		name = directory.rpartition("/")[2]
@@ -121,9 +121,11 @@ def runTreemaker(directory, jets, force=False, name=""):
 		if path == directory:
 			for ntuple in files:
 				workingNtuple = os.path.join(path, ntuple)
-				runOverNtuple(workingNtuple, outputDir, jets)
-#				result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets,))
-#				results.append(result)
+				if linear:
+					runOverNtuple(workingNtuple, outputDir, jets)
+				else:
+					result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets,))
+					results.append(result)
 
 	pool.close()
 	pool.join()
@@ -139,6 +141,7 @@ def runTreemaker(directory, jets, force=False, name=""):
 def main():
 	parser = optparse.OptionParser()
 	parser.add_option("-f", "--force", dest="force", action="store_true", help="If true, delete things and overwrite things.")
+	parser.add_option("-l", "--linear", dest="linear", action="store_true", help="If true, disable multiprocessing.")
 	parser.add_option("-j", "--jets", dest="jets", type="int", help="The number of jets to keep, defaults to 4.", default=4)
 	parser.add_option("-n", "--name", dest="name", help="The name of the output file, defaults to directory name of ntuples.", default="")
 	(opts, args) = parser.parse_args()
@@ -146,13 +149,14 @@ def main():
 	name = opts.name
 	jets = opts.jets
 	force = opts.force
+	linear = opts.linear
 
 	for arg in args:
 		directory = os.path.abspath(arg)
 		if not os.path.exists(directory):
 			print "Error: no such directory: " + arg
 			sys.exit(1)
-		runTreemaker(directory, jets, force, name)
+		runTreemaker(directory, jets, force, name, linear)
 
 if __name__ == '__main__':
 	main()
