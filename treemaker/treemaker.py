@@ -15,16 +15,19 @@ from DataFormats.FWLite import Events, Handle
 version = "0.1_alpha"
 
 def runOverNtuple(ntuple, outputDir):
-	outputName = os.path.join(outputDir, ntuple.rpartition("/"))
-	print outputName
+	print "**** Processing ntuple: " + ntuple
+	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
 	output = ROOT.TFile(outputName, "RECREATE")
 	tree = ROOT.TTree("tree_" + version, "tree_" + version)
 
 	for event in Events(ntuple):
 		pass
+		# Write the actual treemaker!
 
+	output.cd()
 	tree.Write()
 	output.Close()
+	print "**** Finished processing ntuple."
 
 def runTreemaker(directory, name=""):
 	print "*** Running treemaker over " + directory
@@ -40,22 +43,29 @@ def runTreemaker(directory, name=""):
 	except OSError:
 		print "Error: unable to create temporary output directory."
 		print "Please deal with the directory " + outputDir
+		print "Or run treemaker -f."
 		return
 
 	pool = multiprocessing.Pool()
+	results = []
 
 	for path, dirs, files in os.walk(directory):
 		if path == directory:
 			for ntuple in files:
-				pool.apply_async(runOverNtuple, (os.path.join(path, ntuple), outputDir,))
+				workingNtuple = os.path.join(path, ntuple)
+				result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir,))
+				results.append(result)
 
-#	pool.close()
-#	pool.join()
+#	for result in results:
+#		result.get()
+
+	pool.close()
+	pool.join()
 
 	# For now use os.system:
-#	os.system("hadd -m " + name + " " + outputDir + "/*")
+	os.system("hadd -f " + name + " " + outputDir + "/*")
 
-#	shutil.rmtree(outputDir)
+	shutil.rmtree(outputDir)
 
 def main():
 	parser = optparse.OptionParser()
