@@ -26,6 +26,7 @@ def getLabels(ntuple):
 			lineArray.remove('')
 		for i in xrange(len(lineArray)):
 			lineArray[i] = lineArray[i].lstrip().rstrip()
+			lineArray[i] = lineArray[i].lstrip('"').rstrip('"')
 
 		lines.append(lineArray)
 		if not lineArray[1] in modules:
@@ -46,6 +47,13 @@ def getLabels(ntuple):
 
 	return labels	
 
+
+def fillLabels(event, labels):
+	for module, subdict in labels.iteritems():
+		for label, handle in subdict.iteritems():
+			cmsLabel = (module, label)
+			event.getByLabel(cmsLabel, handle)
+	return labels
 
 # testing code:
 # print getLabels("/eos/uscms/store/user/bjr/ntuples/gstar/Gstar_Hadronic_1500GeV_2WM/diffmo_v4_111_1_bZA.root")

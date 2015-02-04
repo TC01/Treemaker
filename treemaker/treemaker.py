@@ -45,6 +45,11 @@ class Jet:
 
 	def fillArray(self, event, booked):
 		event.getByLabel(label, handle)
+
+		jetCollection = 'PrunedCA8'
+		if not self.data:
+			jetCollection += "CORR"
+		jetHandle = labelDict['diffmoca8pp']['PrunedCA8']
 		fourVector = handle.product()
 		try:
 			self.mass = fourVector[self.number - 1].M()
@@ -88,7 +93,9 @@ def runOverNtuple(ntuple, outputDir, jets, data=False):
 			name = "jet" + str(i+1) + key
 			tree.Branch(name, booked[key], name + '/F') 
 
-	for event in Events(ntuple):		
+	for event in Events(ntuple):
+		global labelDict
+		labelDict = labels.fillLabels(event, labelDict)
 		for i in xrange(jets):
 			bookArray[i] = jetArray[i].fillArray(event, bookArray[i])
 		tree.Fill()
