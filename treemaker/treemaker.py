@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# Python standard library.
 import array
 import multiprocessing
 import optparse
@@ -7,13 +8,19 @@ import os
 import shutil
 import sys
 
+# ROOT and FWLite dependencies.
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-
 from DataFormats.FWLite import Events, Handle
 
+# Our own libraries.
+import labels
+
 # Used so trees from multiple versions do not get hadd'd together.
-version = "0.1_alpha"
+version = "0.1_beta"
+
+# The global labels dictionary.
+labelDict = {}
 
 correction = "CORR"
 label = ("diffmoca8pp", "PrunedCA8" + correction)
@@ -21,8 +28,9 @@ handle = Handle("vector<ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double
 
 class Jet:
 
-	def __init__(self, number):
+	def __init__(self, number, data):
 		self.number = number
+		self.data = data
 
 		# Properties we are interested in.
 		self.reset()
@@ -62,7 +70,7 @@ class Jet:
 		self.tau32 = 1.0
 		self.tau21 = 1.0
 
-def runOverNtuple(ntuple, outputDir, jets):
+def runOverNtuple(ntuple, outputDir, jets, data=False):
 	print "**** Processing ntuple: " + ntuple
 	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
 	output = ROOT.TFile(outputName, "RECREATE")
@@ -71,7 +79,7 @@ def runOverNtuple(ntuple, outputDir, jets):
 	bookArray = []
 	jetArray = []
 	for i in xrange(jets):
-		jet = Jet(i + 1)
+		jet = Jet(i + 1, data)
 		jetArray.append(jet)
 		booked = jet.constructArray()
 		bookArray.append(booked)
@@ -93,7 +101,7 @@ def runOverNtuple(ntuple, outputDir, jets):
 	output.Close()
 	print "**** Finished processing ntuple."
 
-def runTreemaker(directory, jets, force=False, name="", linear=False):
+def runTreemaker(directory, jets, data=False, force=False, name="", linear=False):
 	print "*** Running treemaker over " + directory
 	if name == "":
 		name = directory.rpartition("/")[2]
@@ -117,14 +125,22 @@ def runTreemaker(directory, jets, force=False, name="", linear=False):
 	pool = multiprocessing.Pool()
 	results = []
 
+	setupLabels = False
 	for path, dirs, files in os.walk(directory):
 		if path == directory:
 			for ntuple in files:
 				workingNtuple = os.path.join(path, ntuple)
+
+				# Only do this *once*: initialize the global labels array.
+				if not setupLabels:
+					global labelDict
+					labelDict = labels.getLabels(workingNtuple)
+					setupLabels = True
+
 				if linear:
 					runOverNtuple(workingNtuple, outputDir, jets)
 				else:
-					result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets,))
+					result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets, data, ))
 					results.append(result)
 
 	pool.close()
@@ -140,12 +156,14 @@ def runTreemaker(directory, jets, force=False, name="", linear=False):
 
 def main():
 	parser = optparse.OptionParser()
+	parser.add_option("-d", "--data", dest="data", action="store_true", help="If true, we are running on data.")
 	parser.add_option("-f", "--force", dest="force", action="store_true", help="If true, delete things and overwrite things.")
 	parser.add_option("-l", "--linear", dest="linear", action="store_true", help="If true, disable multiprocessing.")
 	parser.add_option("-j", "--jets", dest="jets", type="int", help="The number of jets to keep, defaults to 4.", default=4)
 	parser.add_option("-n", "--name", dest="name", help="The name of the output file, defaults to directory name of ntuples.", default="")
 	(opts, args) = parser.parse_args()
 
+	data = opts.data
 	name = opts.name
 	jets = opts.jets
 	force = opts.force
@@ -156,7 +174,7 @@ def main():
 		if not os.path.exists(directory):
 			print "Error: no such directory: " + arg
 			sys.exit(1)
-		runTreemaker(directory, jets, force, name, linear)
+		runTreemaker(directory, jets, data, force, name, linear)
 
 if __name__ == '__main__':
 	main()
