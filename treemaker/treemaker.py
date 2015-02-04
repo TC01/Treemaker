@@ -16,7 +16,7 @@ from DataFormats.FWLite import Events, Handle
 version = "0.1_alpha"
 
 correction = "CORR"
-label = "("diffmoca8pp", "PrunedCA8" + correction)"
+label = ("diffmoca8pp", "PrunedCA8" + correction)
 handle = Handle("vector<ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > > ")
 
 class Jet:
@@ -27,21 +27,24 @@ class Jet:
 		# Properties we are interested in.
 		self.reset()
 
-	def constructArray():
+	def constructArray(self):
 		booked = {}
-		booked['pt'] = array('f', -1.0)
-		booked['mass'] = array('f', -1.0)
-		booked['eta'] = array('f', 100.0)
-		booked['phi'] = array('f', 100.0)
+		booked['pt'] = array.array('f', [-1.0])
+		booked['mass'] = array.array('f', [-1.0])
+		booked['eta'] = array.array('f', [100.0])
+		booked['phi'] = array.array('f', [100.0])
 		return booked
 
-	def fillArray(event, booked):
+	def fillArray(self, event, booked):
 		event.getByLabel(label, handle)
 		fourVector = handle.product()
-		self.mass = fourVector[self.number - 1].M()
-		self.eta = fourVector[self.number - 1].Eta()
-		self.phi = fourVector[self.number - 1].Phi()
-		self.pt = fourVector[self.number - 1].Pt()
+		try:
+			self.mass = fourVector[self.number - 1].M()
+			self.eta = fourVector[self.number - 1].Eta()
+			self.phi = fourVector[self.number - 1].Phi()
+			self.pt = fourVector[self.number - 1].Pt()
+		except:
+			self.reset()
 
 		# Update the booking 'array'.
 		booked['pt'][0] = self.pt
@@ -50,7 +53,7 @@ class Jet:
 		booked['phi'][0] = self.phi
 		return booked
 
-	def reset():
+	def reset(self):
 		self.mass = -1.0
 		self.pt = -1.0
 		self.eta = 100
@@ -86,6 +89,7 @@ def runOverNtuple(ntuple, outputDir, jets):
 
 	output.cd()
 	tree.Write()
+	output.Write()
 	output.Close()
 	print "**** Finished processing ntuple."
 
@@ -117,8 +121,9 @@ def runTreemaker(directory, jets, force=False, name=""):
 		if path == directory:
 			for ntuple in files:
 				workingNtuple = os.path.join(path, ntuple)
-				result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets,))
-				results.append(result)
+				runOverNtuple(workingNtuple, outputDir, jets)
+#				result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets,))
+#				results.append(result)
 
 	pool.close()
 	pool.join()
@@ -147,7 +152,7 @@ def main():
 		if not os.path.exists(directory):
 			print "Error: no such directory: " + arg
 			sys.exit(1)
-		runTreemaker(directory, jobs, force, name)
+		runTreemaker(directory, jets, force, name)
 
 if __name__ == '__main__':
 	main()
