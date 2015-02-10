@@ -15,6 +15,7 @@ from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
 import labels
+import plugins
 
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.1_beta"
@@ -22,91 +23,31 @@ version = "0.1_beta"
 # The global labels dictionary.
 labelDict = {}
 
-correction = "CORR"
-label = ("diffmoca8pp", "PrunedCA8" + correction)
-handle = Handle("vector<ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > > ")
-
-class Jet:
-
-	def __init__(self, number, data):
-		self.number = number
-		self.data = data
-
-		# Properties we are interested in.
-		self.reset()
-
-	def constructArray(self):
-		booked = {}
-		booked['pt'] = array.array('f', [-1.0])
-		booked['mass'] = array.array('f', [-1.0])
-		booked['eta'] = array.array('f', [100.0])
-		booked['phi'] = array.array('f', [100.0])
-		return booked
-
-	def fillArray(self, event, booked):
-		event.getByLabel(label, handle)
-
-		jetCollection = 'PrunedCA8'
-		if not self.data:
-			jetCollection += "CORR"
-		jetHandle = labelDict['diffmoca8pp']['PrunedCA8']
-		fourVector = handle.product()
-		try:
-			self.mass = fourVector[self.number - 1].M()
-			self.eta = fourVector[self.number - 1].Eta()
-			self.phi = fourVector[self.number - 1].Phi()
-			self.pt = fourVector[self.number - 1].Pt()
-		except:
-			self.reset()
-
-		# Update the booking 'array'.
-		booked['pt'][0] = self.pt
-		booked['mass'][0] = self.mass
-		booked['eta'][0] = self.eta
-		booked['phi'][0] = self.phi
-		return booked
-
-	def reset(self):
-		self.mass = -1.0
-		self.pt = -1.0
-		self.eta = 100
-		self.phi = 100
-		self.csv = 0.0
-		self.tau32 = 1.0
-		self.tau21 = 1.0
-
 def runOverNtuple(ntuple, outputDir, jets, data=False):
 	print "**** Processing ntuple: " + ntuple
 	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
 	output = ROOT.TFile(outputName, "RECREATE")
 	tree = ROOT.TTree("tree_" + version, "tree_" + version)
-
-	bookArray = []
-	jetArray = []
-	for i in xrange(jets):
-		jet = Jet(i + 1, data)
-		jetArray.append(jet)
-		booked = jet.constructArray()
-		bookArray.append(booked)
+	
+	# Set up branches for all variables declared by loaded plugins.
+	variables = {}
+	variables = plugins.setupPlugins(variables, data)
+	for varName, varArray in variables.iteritems():
+		tree.Branch(varName, varArray, varName + '/F')
 		
-		for key in booked.iterkeys():
-			name = "jet" + str(i+1) + key
-			tree.Branch(name, booked[key], name + '/F') 
-
+	# Now, run over all events.
 	for event in Events(ntuple):
 		global labelDict
 		labelDict = labels.fillLabels(event, labelDict)
-		for i in xrange(jets):
-			bookArray[i] = jetArray[i].fillArray(event, bookArray[i])
+		variables = plugins.analyzePlugins(variables, labelDict, data)
 		tree.Fill()
-		for jet in jetArray:
-			jet.reset()
+		variables = plugins.resetPlugins(variables)
 
 	output.cd()
 	tree.Write()
 	output.Write()
 	output.Close()
-	print "**** Finished processing ntuple."
+	print "**** Finished processing ntuple " + ntuple
 
 def runTreemaker(directory, jets, data=False, force=False, name="", linear=False):
 	print "*** Running treemaker over " + directory
@@ -153,7 +94,8 @@ def runTreemaker(directory, jets, data=False, force=False, name="", linear=False
 	pool.close()
 	pool.join()
 
-	# For now use os.system:
+	# For now use os.system to run hadd, we should figure out a better way.
+	# But this works, so...
 	haddCommand = "hadd "
 	if force:
 		haddCommand += " -f "
@@ -175,7 +117,11 @@ def main():
 	jets = opts.jets
 	force = opts.force
 	linear = opts.linear
+	
+	# Load plugins.
+	plugins.loadPlugins([], True)
 
+	# Run the treemaker over all provided directories.
 	for arg in args:
 		directory = os.path.abspath(arg)
 		if not os.path.exists(directory):

@@ -35,17 +35,17 @@ def loadPlugins(toLoad, useAll=False):
 					if not fp is None:
 						fp.close()
 
-def setupPlugins(vars):
+def setupPlugins(variables, isData):
 	for plugin in plugins:
-		vars = plugin.setup(vars)
-	return vars
+		variables = plugin.setup(variables, isData)
+	return variables
 
-def analyzePlugins(vars, labels):
+def analyzePlugins(variables, labels, isData):
 	for plugin in plugins:
-		vars = plugin.analyze(vars, labels)
-	return vars
+		variables = plugin.analyze(variables, labels, isData)
+	return variables
 
-def resetPlugins(vars):
+def resetPlugins(variables):
 	for plugin in plugins:
-		vars = plugin.reset(vars)
-	return vars
+		variables = plugin.reset(variables)
+	return variables
