@@ -1,7 +1,7 @@
 import array
 
 # TODO: turn this back into a knob somewhere.
-numJets = 3
+numJets = 4
 
 class Jet:
 
