@@ -49,3 +49,14 @@ def resetPlugins(variables):
 	for plugin in plugins:
 		variables = plugin.reset(variables)
 	return variables
+
+## Helper functions.
+
+# Helper functions
+	
+def getScriptLocation():
+	"""Helper function to get the location of a Python file."""
+	location = os.path.abspath("./")
+	if __file__.rfind("/") != -1:
+		location = __file__[:__file__.rfind("/")]
+	return location

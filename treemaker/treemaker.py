@@ -20,14 +20,14 @@ import plugins
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.1_beta"
 
-# The global labels dictionary.
-labelDict = {}
-
 def runOverNtuple(ntuple, outputDir, jets, data=False):
 	print "**** Processing ntuple: " + ntuple
 	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
 	output = ROOT.TFile(outputName, "RECREATE")
 	tree = ROOT.TTree("tree_" + version, "tree_" + version)
+
+	# Create the label dictionary.
+	labelDict = labels.getLabels(ntuple)
 	
 	# Set up branches for all variables declared by loaded plugins.
 	variables = {}
@@ -37,7 +37,6 @@ def runOverNtuple(ntuple, outputDir, jets, data=False):
 		
 	# Now, run over all events.
 	for event in Events(ntuple):
-		global labelDict
 		labelDict = labels.fillLabels(event, labelDict)
 		variables = plugins.analyzePlugins(variables, labelDict, data)
 		tree.Fill()
@@ -65,6 +64,7 @@ def runTreemaker(directory, jets, data=False, force=False, name="", linear=False
 		if force:
 			print "Removing directory that was there and proceeding..."
 			shutil.rmtree(outputDir)
+			os.mkdir(outputDir)
 		else:
 			print "Please deal with the directory " + outputDir
 			print "Or run treemaker -f."
@@ -73,17 +73,15 @@ def runTreemaker(directory, jets, data=False, force=False, name="", linear=False
 	pool = multiprocessing.Pool()
 	results = []
 
-	setupLabels = False
+#	setupLabels = False
 	for path, dirs, files in os.walk(directory):
 		if path == directory:
 			for ntuple in files:
 				workingNtuple = os.path.join(path, ntuple)
 
 				# Only do this *once*: initialize the global labels array.
-				if not setupLabels:
-					global labelDict
-					labelDict = labels.getLabels(workingNtuple)
-					setupLabels = True
+#				if not setupLabels:
+#					setupLabels = True
 
 				if linear:
 					runOverNtuple(workingNtuple, outputDir, jets)

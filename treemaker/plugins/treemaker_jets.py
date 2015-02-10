@@ -1,3 +1,5 @@
+import array
+
 # TODO: turn this back into a knob somewhere.
 numJets = 3
 
@@ -28,7 +30,7 @@ class Jet:
 		if not self.data:
 			jetCollection += "CORR"
 		jetHandle = labels['diffmoca8pp']['PrunedCA8']
-		fourVector = handle.product()
+		fourVector = jetHandle.product()
 		try:
 			self.mass = fourVector[self.number - 1].M()
 			self.eta = fourVector[self.number - 1].Eta()
@@ -71,7 +73,7 @@ jets = []
 def setup(variables, isData):
 	global jets
 	for i in xrange(numJets):
-		jets[i] = Jet(i, isData)
+		jets.append(Jet(i + 1, isData))
 		variables = jets[i].setup(variables)
 	return variables
 	
