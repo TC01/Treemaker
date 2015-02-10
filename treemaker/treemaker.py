@@ -18,7 +18,7 @@ import labels
 import plugins
 
 # Used so trees from multiple versions do not get hadd'd together.
-version = "0.1_beta"
+version = "0.1"
 
 def runOverNtuple(ntuple, outputDir, jets, data=False):
 	print "**** Processing ntuple: " + ntuple
@@ -73,15 +73,10 @@ def runTreemaker(directory, jets, data=False, force=False, name="", linear=False
 	pool = multiprocessing.Pool()
 	results = []
 
-#	setupLabels = False
 	for path, dirs, files in os.walk(directory):
 		if path == directory:
 			for ntuple in files:
 				workingNtuple = os.path.join(path, ntuple)
-
-				# Only do this *once*: initialize the global labels array.
-#				if not setupLabels:
-#					setupLabels = True
 
 				if linear:
 					runOverNtuple(workingNtuple, outputDir, jets)
