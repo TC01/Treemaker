@@ -1,8 +1,9 @@
 Treemaker v0.1
 --------------
 
-This Treemaker (named generically, because it is fairly generic and
-extremely extensible) is designed to take EDM Ntuples containing events used
+This Treemaker (named generically, because A. it is fairly generic and
+extremely extensible, and B. because I couldn't come up with a good name)
+is designed to take EDM Ntuples containing events used
 in analyses as part of CERN's [CMS collaboration](http://cms.cern.ch/) and 
 turn them into [ROOT](http://root.cern.ch/) ttrees.
 
