@@ -14,8 +14,8 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
-import labels
-import plugins
+from Treemaker.Treemaker import labels
+from Treemaker.Treemaker import plugins
 
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.1"

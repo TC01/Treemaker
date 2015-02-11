@@ -2,7 +2,7 @@
 
 import os
 
-os.system("./treemaker.py -f /eos/uscms/store/user/bjr/ntuples/gstar/Gstar_Hadronic_1500GeV_2WM -l")
+os.system("treemaker.py -f /eos/uscms/store/user/bjr/ntuples/gstar/Gstar_Hadronic_1500GeV_2WM -l")
 
 ## Results for nonlinear:
 
