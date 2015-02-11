@@ -67,6 +67,23 @@ turn them on and off.
 I also hope to eventually allow Treemaker to load sets of plugins from
 different directories.
 
+Installation:
+-------------
+
+Treemaker is currently packaged as a CMSSW module; that means you can install
+it as follows into a CMSSW release.
+
+```
+cd CMSSW_5_3_*\src
+git clone http://github.com/TC01/Treemaker/
+scram build
+```
+
+This will then install the ```treemaker``` command as a Python script
+that you can run from any directory.
+
+Run ```treemaker -h``` to get a sense of command line options.
+
 Writing Plugins:
 ----------------
 
