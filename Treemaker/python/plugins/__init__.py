@@ -40,9 +40,9 @@ def setupPlugins(variables, isData):
 		variables = plugin.setup(variables, isData)
 	return variables
 
-def analyzePlugins(variables, labels, isData):
+def analyzePlugins(event, variables, labels, isData):
 	for plugin in plugins:
-		variables = plugin.analyze(variables, labels, isData)
+		variables = plugin.analyze(event, variables, labels, isData)
 	return variables
 
 def resetPlugins(variables):

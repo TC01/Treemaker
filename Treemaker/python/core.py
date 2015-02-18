@@ -18,6 +18,26 @@ from DataFormats.FWLite import Events, Handle
 # Our own libraries.
 from Treemaker.Treemaker import labels
 
+def loadPlugins(pluginNames):
+	pluginNames = []
+	try:
+		if opts.config == "":
+			raise RuntimeError
+		with open(opts.config) as configFile:
+			for line in configFile:
+				line = line.rstrip('\n')
+				if not line.lstrip().rstrip() == "" and line[0] == "#":
+					pluginNames.append(line)
+	except RuntimeError:
+		print "ERROR: attempted to run Treemaker without specifying plugins!"
+		print "The safest thing to do is fail."
+		print "Please rerun Treemaker with the -c [config name] option, where [config name]"
+		print "is a file containing newline-separated list of plugin names."
+		sys.exit(1)
+	
+	# Load plugins.
+	plugins.loadPlugins(pluginNames)
+
 def runOverNtuple(ntuple, outputDir, treename, data=False):
 	print "**** Processing ntuple: " + ntuple
 	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
@@ -36,7 +56,7 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	# Now, run over all events.
 	for event in Events(ntuple):
 		labelDict = labels.fillLabels(event, labelDict)
-		variables = plugins.analyzePlugins(variables, labelDict, data)
+		variables = plugins.analyzePlugins(event, variables, labelDict, data)
 		tree.Fill()
 		variables = plugins.resetPlugins(variables)
 

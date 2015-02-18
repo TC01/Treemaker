@@ -10,7 +10,6 @@ import sys
 
 # Our own libraries.
 from Treemaker.Treemaker import core
-from Treemaker.Treemaker import plugins
 
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.2beta"
@@ -26,24 +25,7 @@ def main():
 	(opts, args) = parser.parse_args()
 	
 	# Attempt to load plugins from plugin config file.
-	pluginNames = []
-	try:
-		if opts.config == "":
-			raise RuntimeError
-		with open(opts.config) as configFile:
-			for line in configFile:
-				line = line.rstrip('\n')
-				if not line.lstrip().rstrip() == "" and line[0] == "#":
-					pluginNames.append(line)
-	except RuntimeError:
-		print "ERROR: attempted to run Treemaker without specifying plugins!"
-		print "The safest thing to do is fail."
-		print "Please rerun Treemaker with the -c [config name] option, where [config name]"
-		print "is a file containing newline-separated list of plugin names."
-		sys.exit(1)
-	
-	# Load plugins.
-	plugins.loadPlugins(pluginNames)
+	core.loadPlugins(pluginNames)
 
 	# Run the treemaker over all provided directories.
 	for arg in args:
