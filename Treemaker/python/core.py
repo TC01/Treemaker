@@ -62,12 +62,14 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	i = 0
 	for name, cut in cuts.iteritems():
 		cut.index = i
+		i += 1
 		
 	# Now, run over all events.
 	for event in Events(ntuple):
 		labelDict = labels.fillLabels(event, labelDict)
-		variables, cuts = plugins.analyzePlugins(event, variables, cuts, labelDict, data)
+		variables = plugins.analyzePlugins(event, variables, labelDict, data)
 
+		cuts = plugins.makeCutsPlugins(event, cuts, labelDict, data)
 		for name, cut in cuts.iteritems():
 			cutArray[cut.index] = cut.passed
 

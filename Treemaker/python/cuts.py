@@ -1,5 +1,6 @@
 """
-Implementation of a cuts class.
+Implementation of a cuts class. This is a data-driven class
+and doesn't actually need much code.
 """
 
 class Cut:
