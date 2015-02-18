@@ -18,11 +18,11 @@ from DataFormats.FWLite import Events, Handle
 # Our own libraries.
 from Treemaker.Treemaker import labels
 
-def runOverNtuple(ntuple, outputDir, jets, data=False):
+def runOverNtuple(ntuple, outputDir, treename, data=False):
 	print "**** Processing ntuple: " + ntuple
 	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
 	output = ROOT.TFile(outputName, "RECREATE")
-	tree = ROOT.TTree("tree_" + version, "tree_" + version)
+	tree = ROOT.TTree(treename, treename)
 
 	# Create the label dictionary.
 	labelDict = labels.getLabels(ntuple)
@@ -46,7 +46,7 @@ def runOverNtuple(ntuple, outputDir, jets, data=False):
 	output.Close()
 	print "**** Finished processing ntuple " + ntuple
 
-def runTreemaker(directory, jets, data=False, force=False, name="", linear=False):
+def runTreemaker(directory, treename="tree", data=False, force=False, name="", linear=False):
 	print "*** Running treemaker over " + directory
 	if name == "":
 		name = directory.rpartition("/")[2]
@@ -77,9 +77,9 @@ def runTreemaker(directory, jets, data=False, force=False, name="", linear=False
 				workingNtuple = os.path.join(path, ntuple)
 
 				if linear:
-					runOverNtuple(workingNtuple, outputDir, jets)
+					runOverNtuple(workingNtuple, outputDir, treename)
 				else:
-					result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, jets, data, ))
+					result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, data, ))
 					results.append(result)
 
 	pool.close()
