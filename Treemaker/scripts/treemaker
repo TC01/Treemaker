@@ -33,7 +33,7 @@ def main():
 		with open(opts.config) as configFile:
 			for line in configFile:
 				line = line.rstrip('\n')
-				if not line[0] == "#" and not line.lstrip().rstrip() == "":
+				if not line.lstrip().rstrip() == "" and line[0] == "#":
 					pluginNames.append(line)
 	except RuntimeError:
 		print "ERROR: attempted to run Treemaker without specifying plugins!"
