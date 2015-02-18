@@ -17,16 +17,17 @@ from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
 from Treemaker.Treemaker import labels
+from Treemaker.Treemaker import plugins
 
-def loadPlugins(pluginNames):
+def loadPlugins(config):
 	pluginNames = []
 	try:
-		if opts.config == "":
+		if config == "":
 			raise RuntimeError
-		with open(opts.config) as configFile:
+		with open(config) as configFile:
 			for line in configFile:
 				line = line.rstrip('\n')
-				if not line.lstrip().rstrip() == "" and line[0] == "#":
+				if not line.lstrip().rstrip() == "" and not line[0] == "#":
 					pluginNames.append(line)
 	except RuntimeError:
 		print "ERROR: attempted to run Treemaker without specifying plugins!"
@@ -35,7 +36,7 @@ def loadPlugins(pluginNames):
 		print "is a file containing newline-separated list of plugin names."
 		sys.exit(1)
 	
-	# Load plugins.
+	# Actually load the plugins.
 	plugins.loadPlugins(pluginNames)
 
 def runOverNtuple(ntuple, outputDir, treename, data=False):

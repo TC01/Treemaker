@@ -25,7 +25,7 @@ def main():
 	(opts, args) = parser.parse_args()
 	
 	# Attempt to load plugins from plugin config file.
-	core.loadPlugins(pluginNames)
+	core.loadPlugins(opts.config)
 
 	# Run the treemaker over all provided directories.
 	for arg in args:

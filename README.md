@@ -97,7 +97,7 @@ def setup(variables, isData):
 	variables['varname'] = array.array('f', [-1.0])
 	return variables
 
-def analyze(variables, labels, isData):
+def analyze(event, variables, labels, isData):
 	handle = labels['module']['label']
 	product = handle.product()
 	# Product is likely a vector, so some more processing should happen here.
