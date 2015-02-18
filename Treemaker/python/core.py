@@ -53,11 +53,24 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	variables = plugins.setupPlugins(variables, data)
 	for varName, varArray in variables.iteritems():
 		tree.Branch(varName, varArray, varName + '/F')
+
+	# Create the cuts array.
+	cuts = {}
+	cuts = plugins.createCutsPlugins(cuts, data)
+	cutArray = numpy.zeros(len(cuts), dtype=float)
+	tree.Branch("cuts", cutArray, "cuts[" + len(cuts) + "]/F")
+	i = 0
+	for name, cut in cuts.iteritems():
+		cut.index = i
 		
 	# Now, run over all events.
 	for event in Events(ntuple):
 		labelDict = labels.fillLabels(event, labelDict)
-		variables = plugins.analyzePlugins(event, variables, labelDict, data)
+		variables, cuts = plugins.analyzePlugins(event, variables, cuts, labelDict, data)
+
+		for name, cut in cuts.iteritems():
+			cutArray[cut.index] = cut.passed
+
 		tree.Fill()
 		variables = plugins.resetPlugins(variables)
 

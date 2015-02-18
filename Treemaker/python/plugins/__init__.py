@@ -35,15 +35,20 @@ def loadPlugins(toLoad, useAll=False):
 					if not fp is None:
 						fp.close()
 
+def createCutsPlugins(cuts, isData):
+	for plugin in plugins:
+		cuts = plugin.createCuts(cuts, isData)
+	return cuts
+
 def setupPlugins(variables, isData):
 	for plugin in plugins:
 		variables = plugin.setup(variables, isData)
 	return variables
 
-def analyzePlugins(event, variables, labels, isData):
+def analyzePlugins(event, variables, cuts, labels, isData):
 	for plugin in plugins:
-		variables = plugin.analyze(event, variables, labels, isData)
-	return variables
+		variables, cuts = plugin.analyze(event, variables, labels, isData)
+	return variables, cuts
 
 def resetPlugins(variables):
 	for plugin in plugins:
@@ -51,8 +56,6 @@ def resetPlugins(variables):
 	return variables
 
 ## Helper functions.
-
-# Helper functions
 	
 def getScriptLocation():
 	"""Helper function to get the location of a Python file."""
