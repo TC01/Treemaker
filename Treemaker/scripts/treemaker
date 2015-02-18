@@ -32,6 +32,7 @@ def main():
 			raise RuntimeError
 		with open(opts.config) as configFile:
 			for line in configFile:
+				line = line.rstrip('\n')
 				if not line[0] == "#" and not line.lstrip().rstrip() == "":
 					pluginNames.append(line)
 	except RuntimeError:
