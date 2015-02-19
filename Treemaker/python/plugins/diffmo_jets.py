@@ -80,7 +80,7 @@ def setup(variables, isData):
 def createCuts(cuts):
 	return cuts
 	
-def analyze(event, variables, cuts, labels, isData):
+def analyze(event, variables, labels, isData):
 	for jet in jets:
 		variables = jet.analyze(variables, labels)
 	return variables
