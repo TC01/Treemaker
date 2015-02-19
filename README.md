@@ -184,6 +184,23 @@ you will have given them in your plugins.
 For more help, look at other plugins that are shipped in this repository or
 contact me directly for more information.
 
+Testing Plugins:
+----------------
+
+When debugging your code, please be sure to use the ```-l``` option. This
+forces Treemaker to *not* use Python multiprocessing, which makes things
+substantially slower. For unfortunate reasons, errors in your plugins
+won't be printed to standard output if you run with multiprocessing; so
+if you want to verify your ntuples are actually being processed, please
+use the ```-l``` option.
+
+Specifically; you will see the "started processing" message but never
+a "finished processing" message. If you do not see the "finished" message,
+that means an error is in your code somewhere, so please run with ```-l```
+to debug.
+
+There is currently a ticket open about these problems.
+
 Credits:
 --------
 
