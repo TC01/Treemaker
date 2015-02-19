@@ -1,4 +1,4 @@
-Treemaker v0.1
+Treemaker v0.2
 --------------
 
 This Treemaker (named generically, because A. it is fairly generic and
@@ -51,21 +51,24 @@ the Treemaker. That core is also responsible for opening all of the ntuples
 order of magnitude faster than they would when processing some ~250 files on
 a 24-core machine) and setting up the event loop.
 
-You are encouraged to submit any plugins you write upstream to this repository,
-but this is certainly not required. They are only small Python files, after
-all!
+You are encouraged to submit any plugins you write upstream to this repository.
 
 The Future:
 -----------
 
-At the moment, Treemaker will run all plugins in its plugins directory on
-whatever ntuples you happen to pass it. See the Issues tracker for more info,
-but what I will eventually write is some more exposed control for plugins,
-perhaps allowing them to define settings as well as giving users the option to
-turn them on and off.
+See the Issues tracker for more info.
 
-I also hope to eventually allow Treemaker to load sets of plugins from
-different directories.
+There are some things that could use some work, definitely. The treemaker
+could, for example, put the cut report that it generates inside the ROOT
+file rather than as a plaintext file.
+
+More exposed control for plugins from the configuration file might be nice;
+for example, allowing them to expose knobs rather than just "yes, run this"
+or "no, do not run this".
+
+I would also like to do some optimization of the way Handles are loaded
+(to make it lazy instead of eager, thus causing significant speed
+improvements), but we'll see if I ever actually get around to that.
 
 Installation:
 -------------
@@ -84,14 +87,32 @@ that you can run from any directory.
 
 Run ```treemaker -h``` to get a sense of command line options.
 
+Running:
+--------
+
+As we have discussed, the Treemaker is built around the concept of
+plugins. Because we hope to hold a large number of plugins in this
+repository, it would be bad if running the treemaker.
+
+To solve this problem, as of Treemaker v0.2, configuration files
+are now required. Config files are currently simple newline-delineated
+files containing lists of plugins (there is an example config file
+in this repository, under ```data/```. Only plugins listed in a config
+file will be loaded and executed.
+
+You must specify this file with the ```treemaker -c FILENAME``` option;
+if you do not specify a config file, Treemaker will refuse to run.
+
 Writing Plugins:
 ----------------
 
 To write a plugin, create a new Python file and land it in: plugins/.
-The file needs to implement three methods, here is an example:
+The file needs to implement five methods, here is an example:
 
 ```
 import array
+
+from Treemaker.Treemaker import cuts
 
 def setup(variables, isData):
 	variables['varname'] = array.array('f', [-1.0])
@@ -108,9 +129,17 @@ def reset(variables):
 	variables['varname'][0] = -1.0
 	return variables
 
+def createCuts(cutDict):
+	cutDict['example'] = cuts.Cut('example', 'This is some example cut description').
+
+def makeCuts(event, variables, cutDict, labels, isData):
+	# This will always pass the cut, obviously we'd really do something
+	# more interesting with the variables and labels dictionaries.
+	cutDict['example'].passed = 1
+
 ```
 
-Here, ```variables``` and ```labels``` are both dictionaries.
+Here, ```variables```, ```cutDict```,  and ```labels``` are all dictionaries.
 
 The ```labels``` dictionary is produced by running ```edmDumpEventContent```
 over the ntuples that are being converted. A 2D dictionary is then created;
@@ -140,8 +169,37 @@ as you might expect, you can do much more complicated things in plugins. Take
 a look at diffmo_jets.py for an example of a more complicated implementation
 (that defines a Jet class and determines how many of them to keep).
 
+The ```cuts``` functionality was added in version 0.2. Cuts are essentially
+special variables that are stored in the resulting ttree as a single integer
+array. This allows you to implement cuts you'll need later in your analysis
+(for instance, such as triggers). When you then want to run an analysis,
+you can quickly check if ```cuts[i]``` is 0 or 1 (or some other value) to
+determine if the event passed whatever analysis was mapped to cut ```i```.
+
+Because cuts are named, rather than numbered, a report file 
+(```*_cuts_report.txt```) is generated after Treemaker finishes running with
+a mapping between indices in the ```cuts``` array in the tree and the names
+you will have given them in your plugins.
+
 For more help, look at other plugins that are shipped in this repository or
 contact me directly for more information.
+
+Testing Plugins:
+----------------
+
+When debugging your code, please be sure to use the ```-l``` option. This
+forces Treemaker to *not* use Python multiprocessing, which makes things
+substantially slower. For unfortunate reasons, errors in your plugins
+won't be printed to standard output if you run with multiprocessing; so
+if you want to verify your ntuples are actually being processed, please
+use the ```-l``` option.
+
+Specifically; you will see the "started processing" message but never
+a "finished processing" message. If you do not see the "finished" message,
+that means an error is in your code somewhere, so please run with ```-l```
+to debug.
+
+There is currently a ticket open about these problems.
 
 Credits:
 --------
