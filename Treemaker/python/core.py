@@ -15,6 +15,9 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
+# Other.
+import numpy
+
 # Our own libraries.
 from Treemaker.Treemaker import labels
 from Treemaker.Treemaker import plugins
@@ -53,13 +56,34 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	variables = plugins.setupPlugins(variables, data)
 	for varName, varArray in variables.iteritems():
 		tree.Branch(varName, varArray, varName + '/F')
+
+	# Create the cuts array.
+	cuts = {}
+	cuts = plugins.createCutsPlugins(cuts)
+	# For reasons that I'm sure I'd rather not know, this does not work.
+	# Despite the fact that I lifted this line from writeEvents, my old
+	# treemaker/converter I wrote back in 2013... I hate everything.
+#	cutArray = numpy.zeros(len(cuts))
+	cutArray = array.array('i', [0] * len(cuts))
+	tree.Branch("cuts", cutArray, "cuts[" + str(len(cuts)) + "]/I")
+	i = 0
+	for name, cut in cuts.iteritems():
+		cuts[name].index = i
+		i += 1
 		
 	# Now, run over all events.
 	for event in Events(ntuple):
 		labelDict = labels.fillLabels(event, labelDict)
 		variables = plugins.analyzePlugins(event, variables, labelDict, data)
+
+		cuts = plugins.makeCutsPlugins(event, variables, cuts, labelDict, data)
+		for name, cut in cuts.iteritems():
+			cutArray[cut.index] = cut.passed
+
 		tree.Fill()
 		variables = plugins.resetPlugins(variables)
+		for name, cut in cuts.iteritems():
+			cutArray[cut.index] = 0
 
 	output.cd()
 	tree.Write()
