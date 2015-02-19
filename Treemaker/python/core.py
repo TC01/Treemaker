@@ -60,11 +60,15 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	# Create the cuts array.
 	cuts = {}
 	cuts = plugins.createCutsPlugins(cuts)
-	cutArray = numpy.zeros(len(cuts), dtype=float)
-	tree.Branch("cuts", cutArray, "cuts[" + str(len(cuts)) + "]/F")
+	# For reasons that I'm sure I'd rather not know, this does not work.
+	# Despite the fact that I lifted this line from writeEvents, my old
+	# treemaker/converter I wrote back in 2013... I hate everything.
+#	cutArray = numpy.zeros(len(cuts))
+	cutArray = array.array('i', [0] * len(cuts))
+	tree.Branch("cuts", cutArray, "cuts[" + str(len(cuts)) + "]/I")
 	i = 0
 	for name, cut in cuts.iteritems():
-		cut.index = i
+		cuts[name].index = i
 		i += 1
 		
 	# Now, run over all events.
@@ -78,6 +82,8 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 
 		tree.Fill()
 		variables = plugins.resetPlugins(variables)
+		for name, cut in cuts.iteritems():
+			cutArray[cut.index] = 0
 
 	output.cd()
 	tree.Write()

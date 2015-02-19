@@ -26,7 +26,7 @@ def makeCuts(event, variables, cutArray, labels, isData):
 			raise IndexError
 	except IndexError:
 		cutArray["gstar_preselection"].passed = 0
-	
+
 	return cutArray
 	
 def reset(variables):
