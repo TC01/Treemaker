@@ -15,6 +15,9 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
+# Other.
+import numpy
+
 # Our own libraries.
 from Treemaker.Treemaker import labels
 from Treemaker.Treemaker import plugins
@@ -58,7 +61,7 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	cuts = {}
 	cuts = plugins.createCutsPlugins(cuts)
 	cutArray = numpy.zeros(len(cuts), dtype=float)
-	tree.Branch("cuts", cutArray, "cuts[" + len(cuts) + "]/F")
+	tree.Branch("cuts", cutArray, "cuts[" + str(len(cuts)) + "]/F")
 	i = 0
 	for name, cut in cuts.iteritems():
 		cut.index = i

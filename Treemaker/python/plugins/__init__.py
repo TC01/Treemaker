@@ -34,6 +34,14 @@ def loadPlugins(toLoad, useAll=False):
 				finally:
 					if not fp is None:
 						fp.close()
+					toLoad.remove(name)
+
+	# Deal with unloaded plugins.
+	# This should be a failure conditional.
+	if len(toLoad) != 0:
+		for name in toLoad:
+			print "ERROR: unable to load plugin " + name
+		sys.exit(1)
 
 def createCutsPlugins(cuts):
 	for plugin in plugins:
@@ -52,7 +60,7 @@ def analyzePlugins(event, variables, labels, isData):
 
 def makeCutsPlugins(event, variables, cuts, labels, isData):
 	for plugin in plugins:
-		cuts = plugin.applyCuts(event, variables, cuts, labels, isData)
+		cuts = plugin.makeCuts(event, variables, cuts, labels, isData)
 	return cuts	
 
 def resetPlugins(variables):

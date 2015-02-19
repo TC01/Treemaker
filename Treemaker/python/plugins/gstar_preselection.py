@@ -15,16 +15,16 @@ def analyze(event, variables, labels, isData):
 	
 def makeCuts(event, variables, cutArray, labels, isData):
 	jetCollection = 'PrunedCA8'
-	if not self.data:
+	if not isData:
 		jetCollection += "CORR"
 	jetHandle = labels['diffmoca8pp']['PrunedCA8']
-	fourVector = jetHandle.product()
+	fourVectors = jetHandle.product()
 	try:
-		if fourVector[3].M() > 50:
+		if fourVectors[2].M() > 50:
 			cutArray["gstar_preselection"].passed = 1
 		else:
-			raise RuntimeError
-	except:
+			raise IndexError
+	except IndexError:
 		cutArray["gstar_preselection"].passed = 0
 	
 	return cutArray
