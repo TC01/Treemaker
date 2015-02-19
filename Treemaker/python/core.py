@@ -56,7 +56,7 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 
 	# Create the cuts array.
 	cuts = {}
-	cuts = plugins.createCutsPlugins(cuts, data)
+	cuts = plugins.createCutsPlugins(cuts)
 	cutArray = numpy.zeros(len(cuts), dtype=float)
 	tree.Branch("cuts", cutArray, "cuts[" + len(cuts) + "]/F")
 	i = 0

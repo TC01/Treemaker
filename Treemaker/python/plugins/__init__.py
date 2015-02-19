@@ -35,9 +35,9 @@ def loadPlugins(toLoad, useAll=False):
 					if not fp is None:
 						fp.close()
 
-def createCutsPlugins(cuts, isData):
+def createCutsPlugins(cuts):
 	for plugin in plugins:
-		cuts = plugin.createCuts(cuts, isData)
+		cuts = plugin.createCuts(cuts)
 	return cuts
 
 def setupPlugins(variables, isData):
