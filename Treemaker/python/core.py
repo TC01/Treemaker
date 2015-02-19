@@ -66,10 +66,11 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 #	cutArray = numpy.zeros(len(cuts))
 	cutArray = array.array('i', [0] * len(cuts))
 	tree.Branch("cuts", cutArray, "cuts[" + str(len(cuts)) + "]/I")
-	i = 0
-	for name, cut in cuts.iteritems():
+	# We care about order here so it's consistent.
+	ordered = sorted(cuts, key=cuts.get)
+	for i in xrange(len(ordered)):
+		name = ordered[i]
 		cuts[name].index = i
-		i += 1
 		
 	# Now, run over all events.
 	for event in Events(ntuple):
@@ -136,5 +137,21 @@ def runTreemaker(directory, treename="tree", data=False, force=False, name="", l
 	if force:
 		haddCommand += " -f "
 	os.system(haddCommand + name + " " + outputDir + "/*")
+
+	# We can rely on the ordering here to make things be the same order
+	# as they were in the subprocesses, to generate a report.
+	cuts = {}
+	cuts = plugins.createCutsPlugins(cuts)	
+	ordered = sorted(cuts, key=cuts.get)
+	for i in xrange(len(ordered)):
+		cutName = ordered[i]
+		cuts[cutName].index = i
+
+	# Generate output cuts report.
+	# TODO: store inside the tree itself.
+	reportName = name.partition(".")[0] + "_cuts_report.txt"
+	with open(reportName, 'wb') as report:
+		for cutName, cut in cuts.iteritems():
+			report.write(str(cut) + "\n")
 
 	shutil.rmtree(outputDir)

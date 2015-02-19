@@ -13,7 +13,7 @@ class Cut:
 		self.index = -1
 
 	def __str__(self):
-		return "Cut " + name + " at index " + index + ": " + description
+		return "Cut " + self.name + " at index " + str(self.index) + ": " + self.description
 
 	def __repr__(self):
 		return self.__str()
