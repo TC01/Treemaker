@@ -69,7 +69,7 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 		labelDict = labels.fillLabels(event, labelDict)
 		variables = plugins.analyzePlugins(event, variables, labelDict, data)
 
-		cuts = plugins.makeCutsPlugins(event, cuts, labelDict, data)
+		cuts = plugins.makeCutsPlugins(event, variables, cuts, labelDict, data)
 		for name, cut in cuts.iteritems():
 			cutArray[cut.index] = cut.passed
 

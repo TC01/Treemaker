@@ -85,7 +85,7 @@ def analyze(event, variables, cuts, labels, isData):
 		variables = jet.analyze(variables, labels)
 	return variables
 	
-def makeCuts(event, cuts, labels, isData):
+def makeCuts(event, variables, cuts, labels, isData):
 	return cuts
 	
 def reset(variables):

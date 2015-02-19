@@ -50,10 +50,10 @@ def analyzePlugins(event, variables, labels, isData):
 		variables = plugin.analyze(event, variables, labels, isData)
 	return variables
 
-def applyCutsPlugins(event, cuts, labels, isData):
+def makeCutsPlugins(event, variables, cuts, labels, isData):
 	for plugin in plugins:
-		variables = plugin.applyCuts(event, cuts, labels, isData)
-	return variables	
+		cuts = plugin.applyCuts(event, variables, cuts, labels, isData)
+	return cuts	
 
 def resetPlugins(variables):
 	for plugin in plugins:
