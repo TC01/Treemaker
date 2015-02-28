@@ -8,15 +8,25 @@ import sys
 
 plugins = []
 
-def getPossiblePluginNames(namesToLoad=[], location=os.path.join(getScriptLocation())):
+## Helper functions.
+def getScriptLocation():
+	"""Helper function to get the location of a Python file."""
+	location = os.path.abspath("./")
+	if __file__.rfind("/") != -1:
+		location = __file__[:__file__.rfind("/")]
+	return os.path.join(location)
+
+defaultLocation = getScriptLocation()
+
+def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 	"""	Return a list of plugin names that we can try to import."""
 	names = []
 	for path, dirs, files in os.walk(location):
 		if path == location:
 			for filename in files:
 				if not ".pyc" in filename or "__init__" in filename:
+					filename = filename[:-len(".py")]
 					if filename in namesToLoad or namesToLoad == []:
-						filename = filename[:-len(".py")]
 						names.append(filename)
 	return names
 
@@ -27,12 +37,10 @@ def loadPlugins(namesToLoad, useAll=False):
 	if useAll:
 		namesToLoad = []
 	names = getPossiblePluginNames(namesToLoad)
-
 	pluginDict = {}
 
 	# Now, use imp to load all the plugins we specified
 	for name in names:
-		print "*** Loading " + name
 		try:
 			test = sys.modules[name]
 			print "*** Error: a module with the name " + name + " was already loaded!"
@@ -50,22 +58,20 @@ def loadPlugins(namesToLoad, useAll=False):
 	# Sort plugins to make sure they got loaded in the right order.
 	i = 0
 	for pluginName in namesToLoad:
+		print "*** Loading " + pluginName
 		plugins[i] = pluginDict[pluginName]
 		i += 1
 
 	# Deal with unloaded plugins.
 	# This should be a failure conditional.
-	if len(toLoad) != len(plugins):
-		for name in toLoad:
+	if len(namesToLoad) != len(plugins):
+		for name in namesToLoad:
 			if not name in pluginDict.keys():
 				print "ERROR: unable to load plugin " + name
 		sys.exit(1)
 
 	# Then return plugins, just in case.
 	return plugins
-
-def sortPlugins(toLoad):
-	
 
 def createCutsPlugins(cuts):
 	for plugin in plugins:
@@ -91,12 +97,3 @@ def resetPlugins(variables):
 	for plugin in plugins:
 		variables = plugin.reset(variables)
 	return variables
-
-## Helper functions.
-	
-def getScriptLocation():
-	"""Helper function to get the location of a Python file."""
-	location = os.path.abspath("./")
-	if __file__.rfind("/") != -1:
-		location = __file__[:__file__.rfind("/")]
-	return location
