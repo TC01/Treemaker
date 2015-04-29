@@ -78,9 +78,13 @@ it as follows into a CMSSW release.
 
 ```
 cd CMSSW_5_3_*\src
-git clone http://github.com/TC01/Treemaker/
+git clone http://github.com/TC01/Treemaker/ $VERSION
 scram build
 ```
+
+We recommend you clone the last stable version. Version names are of the form
+"vX.Y", where X is the major release and Y is the minor release. The current
+version is listed on top of the README.
 
 This will then install the ```treemaker``` command as a Python script
 that you can run from any directory.
