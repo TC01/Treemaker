@@ -82,8 +82,12 @@ def writeConfigFile(dataset, opts):
 	configParser.set('dataset', 'output_tree_name', opts.treename)
 
 	configParser.add_section('splitting')
-	configParser.set('splitting', 'split_into', '-1')
-	configParser.set('splitting', 'split_by', -1)
+	if opts.splitInto > 0 and opts.splitBy > 0:
+		print "Error: cannot set both --split-into and --split-by to be nonnegative!"
+		print "Treemaker will not know which setting to respect."
+		sys.exit(1)
+	configParser.set('splitting', 'split_into', opts.splitInto)
+	configParser.set('splitting', 'split_by', opts.splitBy)
 	
 	configParser.add_section('plugins')
 	pluginList = loadPluginList(opts.pluginList)
