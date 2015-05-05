@@ -18,15 +18,15 @@ def getParser():
 	parser.add_option("-n", "--name", dest="name", help="The name of the output file, defaults to directory name of ntuples.", default=config.defaultFileName)
 	parser.add_option("-t", "--treename", dest="treename", help="The name of the output TTree object.", default=config.defaultTreeName)
 	
-	parser.add_option('--split-into', dest='splitInto', help="Maximum number of jobs to run in each split.", default=None)
-	parser.add_option('--split-by', dest='splitBy', help="Number of splits to make.", default=None)
+	parser.add_option('--split-into', dest='splitInto', help="Maximum number of jobs to run in each split.", default=-1, type=int)
+	parser.add_option('--split-by', dest='splitBy', help="Number of splits to make.", default=-1, type=int)
 	
 	return parser
 
 def getCLIParser():
 	parser = getParser()
 
-	parser.add_option('--split-index', dest='splitIndex', help="The nth split to run, using the job-split parameters.", default=None)
+	parser.add_option('--split-index', dest='splitIndex', help="The nth split to run, using the job-split parameters.", default=-1, type=int)
 	
 	return parser
 	

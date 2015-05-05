@@ -92,6 +92,23 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	output.Close()
 	print "**** Finished processing ntuple " + ntuple
 
+def doSplitting(ntuples, index, splitBy, splitInto):
+	numNtuples = len(ntuples)
+	# These cases should be mutually exclusive.
+	if splitBy > 0:
+		startJobs = (numNtuples / splitBy) * index
+		endJobs = (numNtuples / splitBy) * (index + 1) - 1
+		if index + 1 > splitBy:
+			print "Error: cannot make this splitting with index + 1 > number of splits!"
+			sys.exit(1)
+	elif splitInto > 0:
+		startJobs = splitInto * index
+		endJobs = splitInto * (index + 1) - 1
+
+	if endJobs >= len(ntuples):
+		endJobs = len(ntuple) - 1
+		return ntuples[startJobs:endJobs]
+
 #def runTreemaker(directory, treename="tree", data=False, force=False, name="", linear=False):
 def runTreemaker(treemakerConfig):
 	
@@ -102,13 +119,17 @@ def runTreemaker(treemakerConfig):
 	linear = treemakerConfig.linear
 	force = treemakerConfig.force
 	treename = treemakerConfig.treeName
+	index = treemakerConfig.splitIndex
 	plugins.loadPlugins(treemakerConfig.pluginNames)
-	
+
+	# Create output name
 	print "*** Running treemaker over " + directory
 	if name == "":
 		name = directory.rpartition("/")[2]
 	if not ".root" in name:
 		name += ".root"
+	if index != -1:
+		name + "Index" + str(index) + "_" + name
 	print "*** Output file name = " + name
 
 	outputDir = os.path.join(os.getcwd(), name + "_temp")
@@ -127,17 +148,27 @@ def runTreemaker(treemakerConfig):
 
 	pool = multiprocessing.Pool()
 	results = []
-
+	
+	# Accumulate a list of files. NO SUBDIRECTORIES, I may change my mind on this one
+	# once I consider how the sorting should happen.
+	ntuples = []
 	for path, dirs, files in os.walk(directory):
 		if path == directory:
 			for ntuple in files:
-				workingNtuple = os.path.join(path, ntuple)
+				ntuples.append(ntuple)
 
-				if linear:
-					runOverNtuple(workingNtuple, outputDir, treename)
-				else:
-					result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, data, ))
-					results.append(result)
+	# Do splitting.
+	ntuples = sorted(ntuples)
+	splitNtuples = doSplitting(ntuples, index, treemakerConfig.splitBy, treemakerConfig.splitInto)
+
+	for ntuple in splitNtuples:
+		workingNtuple = os.path.join(path, ntuple)
+
+		if linear:
+			runOverNtuple(workingNtuple, outputDir, treename)
+		else:
+			result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, data, ))
+			results.append(result)
 
 	pool.close()
 	pool.join()

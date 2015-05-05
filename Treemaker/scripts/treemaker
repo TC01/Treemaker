@@ -22,6 +22,17 @@ def main():
 		treemakerConfig = config.readConfiguration(arg)
 		treemakerConfig.force = opts.force
 		treemakerConfig.linear = opts.linear
+		treemakerConfig.splitIndex = opts.splitIndex
+		
+		# Read in these 'optional' options
+		if opts.splitInto > 0 and opts.splitBy > 0:
+			print "Error: cannot set both splitInto and splitBy, please specify one or the other."
+			sys.exit(1)
+		if opts.splitInto > 0:
+			treemakerConfig.splitInto = opts.splitInto
+		if opts.splitBy > 0:
+			treemakerConfig.splitBy = opts.splitBy
+
 		core.runTreemaker(treemakerConfig)
 	
 	# Old code.

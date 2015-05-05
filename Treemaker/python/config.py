@@ -20,6 +20,7 @@ class TreemakerConfig:
 		# Command line options.
 		self.force = False
 		self.linear = False
+		self.splitIndex = -1
 
 	def parseOption(self, configParser, section, option, default, type=None):
 		result = default
@@ -54,9 +55,9 @@ class TreemakerConfig:
 		self.treeName = self.parseOption(configParser, 'dataset', 'output_tree_name', defaultTreeName)
 		
 		# Parse the splitting options.
-		self.splitInto = self.parseOption(configParser, 'dataset', 'split_into', None, 'int')
-		self.splitBy = self.parseOption(configParser, 'dataset', 'split_by', None, 'int')
-		if self.splitBy is not None and self.splitInto is not None:
+		self.splitInto = self.parseOption(configParser, 'dataset', 'split_into', -1, 'int')
+		self.splitBy = self.parseOption(configParser, 'dataset', 'split_by', -1, 'int')
+		if self.splitBy != -1 and self.splitInto != -1:
 			print "Error: cannot set both split_into and split_by at the same time."
 		
 		self.readPlugins(configParser)
