@@ -13,7 +13,7 @@ def getParser():
 	parser.add_option("-l", "--linear", dest="linear", action="store_true", help="If true, disable multiprocessing.")
 
 	# These options should maybe go away.
-	parser.add_option("-d", "--data", dest="data", action="store_true", help="If true, we are running on data.")
+	parser.add_option("-d", "--data", dest="data", action="store_true", help="If true, we are running on data.", default=False)
 	parser.add_option("-n", "--name", dest="name", help="The name of the output file, defaults to directory name of ntuples.", default=config.defaultFileName)
 	parser.add_option("-t", "--treename", dest="treename", help="The name of the output TTree object.", default=config.defaultTreeName)
 	

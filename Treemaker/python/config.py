@@ -75,17 +75,17 @@ class TreemakerConfig:
 def writeConfigFile(dataset, opts):
 	configParser = ConfigParser.RawConfigParser()
 	
-	configParser.addSection('dataset')
+	configParser.add_section('dataset')
 	configParser.set('dataset', 'directory', dataset)
 	configParser.set('dataset', 'is_data', str(opts.data))
 	configParser.set('dataset', 'output_file_name', opts.name)
 	configParser.set('dataset', 'output_tree_name', opts.treename)
 
-	configParser.addSection('splitting')
+	configParser.add_section('splitting')
 	configParser.set('splitting', 'split_into', '-1')
 	configParser.set('splitting', 'split_by', -1)
 	
-	configParser.addSection('plugins')
+	configParser.add_section('plugins')
 	pluginList = loadPluginList(opts.pluginList)
 	for plugin in pluginList:
 		configParser.set('plugins', plugin, 'True')
@@ -95,12 +95,13 @@ def writeConfigFile(dataset, opts):
 	if outputName == "":
 		outputName = dataset.rpartition("/")[2]
 	outputName += '.cfg'
-	configParser.write(outputName)
+	with open(outputName, 'wb') as outputFile:
+		configParser.write(outputFile)
 
 def loadPluginList(filename):
 	pluginNames = []
 	try:
-		if config == "":
+		if filename == "":
 			raise RuntimeError
 		with open(filename) as pluginFile:
 			for line in pluginFile:

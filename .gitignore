@@ -58,3 +58,4 @@ target/
 # ROOT ignores:
 
 *.root
+*_cuts_report.txt
