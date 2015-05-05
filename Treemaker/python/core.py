@@ -92,7 +92,18 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	output.Close()
 	print "**** Finished processing ntuple " + ntuple
 
-def runTreemaker(directory, treename="tree", data=False, force=False, name="", linear=False):
+#def runTreemaker(directory, treename="tree", data=False, force=False, name="", linear=False):
+def runTreemaker(treemakerConfig):
+	
+	# Read arguments from config and load plugins.
+	directory = treemakerConfig.directory
+	name = treemakerConfig.fileName
+	data = treemakerConfig.isData
+	linear = treemakerConfig.linear
+	force = treemakerConfig.force
+	treename = treemakerConfig.treename
+	plugins.loadPlugins(treemakerConfig.pluginNames)
+	
 	print "*** Running treemaker over " + directory
 	if name == "":
 		name = directory.rpartition("/")[2]

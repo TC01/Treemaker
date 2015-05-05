@@ -19,19 +19,22 @@ def main():
 	# The only positional argument treemaker v3 takes is config file.
 	for arg in args:
 		treemakerConfig = config.readConfigurationFile(arg)
-		
+		treemakerConfig.force = opts.force
+		treemakerConfig.linear = opts.linear
 		core.runTreemaker(treemakerConfig)
 	
+	# Old code.
+	
 	# Attempt to load plugins from plugin config file.
-	core.loadPlugins(opts.config)
+	#core.loadPlugins(opts.config)
 
 	# Run the treemaker over all provided directories.
-	for arg in args:
-		directory = os.path.abspath(arg)
-		if not os.path.exists(directory):
-			print "Error: no such directory: " + arg
-			sys.exit(1)
-		core.runTreemaker(directory, opts.treename, opts.data, opts.force, opts.name, opts.linear)
+	#for arg in args:
+	#	directory = os.path.abspath(arg)
+	#	if not os.path.exists(directory):
+	#		print "Error: no such directory: " + arg
+	#		sys.exit(1)
+	#	core.runTreemaker(directory, opts.treename, opts.data, opts.force, opts.name, opts.linear)
 
 if __name__ == '__main__':
 	main()

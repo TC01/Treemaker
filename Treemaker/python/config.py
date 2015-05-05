@@ -17,6 +17,10 @@ class TreemakerConfig:
 		self.configFileName = configFileName
 		self.setup(configFileName)
 
+		# Command line options.
+		self.force = False
+		self.linear = False
+
 	def parseOption(self, parser, section, option, default, type=None):
 		result = default
 		try:
