@@ -14,7 +14,7 @@ from Treemaker.Treemaker import core
 from Treemaker.Treemaker import parser
 
 def main():
-	treeParser = parser.getParser()
+	treeParser = parser.getCLIParser()
 	(opts, args) = treeParser.parse_args()
 	
 	# The only positional argument treemaker v3 takes is config file.

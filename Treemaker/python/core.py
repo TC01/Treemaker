@@ -105,9 +105,12 @@ def doSplitting(ntuples, index, splitBy, splitInto):
 		startJobs = splitInto * index
 		endJobs = splitInto * (index + 1) - 1
 
-	if endJobs >= len(ntuples):
-		endJobs = len(ntuple) - 1
+	if splitBy > 0 or splitInto > 0:
+		if endJobs >= len(ntuples):
+			endJobs = len(ntuple) - 1
 		return ntuples[startJobs:endJobs]
+	else:
+		return ntuples
 
 #def runTreemaker(directory, treename="tree", data=False, force=False, name="", linear=False):
 def runTreemaker(treemakerConfig):
@@ -129,7 +132,7 @@ def runTreemaker(treemakerConfig):
 	if not ".root" in name:
 		name += ".root"
 	if index != -1:
-		name + "Index" + str(index) + "_" + name
+		name = "Index" + str(index) + "_" + name
 	print "*** Output file name = " + name
 
 	outputDir = os.path.join(os.getcwd(), name + "_temp")
