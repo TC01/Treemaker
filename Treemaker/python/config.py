@@ -56,8 +56,8 @@ class TreemakerConfig:
 		self.treeName = self.parseOption(configParser, 'dataset', 'output_tree_name', defaultTreeName)
 		
 		# Parse the splitting options.
-		self.splitInto = self.parseOption(configParser, 'dataset', 'split_into', -1, 'int')
-		self.splitBy = self.parseOption(configParser, 'dataset', 'split_by', -1, 'int')
+		self.splitInto = self.parseOption(configParser, 'splitting', 'split_into', -1, 'int')
+		self.splitBy = self.parseOption(configParser, 'splitting', 'split_by', -1, 'int')
 		if self.splitBy != -1 and self.splitInto != -1:
 			print "Error: cannot set both split_into and split_by at the same time."
 		
