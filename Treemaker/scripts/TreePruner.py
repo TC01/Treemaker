@@ -1,4 +1,7 @@
 # Pruner for trees. Takes a tree and removes events not passing certain cuts.
+
+# Code written by Marc. Memo to add some error checking to it someday. --Ben
+
 import os
 import ROOT
 from ROOT import *
