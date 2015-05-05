@@ -19,7 +19,7 @@ def main():
 	
 	# The only positional argument treemaker v3 takes is config file.
 	for arg in args:
-		treemakerConfig = config.readConfiguration(arg)
+		treemakerConfig = config.TreemakerConfig(arg)
 		treemakerConfig.force = opts.force
 		treemakerConfig.linear = opts.linear
 		treemakerConfig.splitIndex = opts.splitIndex

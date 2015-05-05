@@ -166,7 +166,6 @@ def runTreemaker(treemakerConfig):
 
 	for ntuple in splitNtuples:
 		workingNtuple = os.path.join(path, ntuple)
-
 		if linear:
 			runOverNtuple(workingNtuple, outputDir, treename)
 		else:

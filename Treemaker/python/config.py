@@ -4,6 +4,7 @@ Configuration file loader.
 
 import ConfigParser
 import os
+import sys
 
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.3"
@@ -71,7 +72,44 @@ class TreemakerConfig:
 		except ConfigParser.NoSectionError:
 			print "Error: Config file must have a 'plugins' section!"
 
-def readConfiguration(configFile):
-	"""	Reads the config file using configparser."""
-	config = TreemakerConfig(configFile)
-	return config
+def writeConfigFile(dataset, opts):
+	configParser = ConfigParser.RawConfigParser()
+	
+	configParser.addSection('dataset')
+	configParser.set('dataset', 'directory', dataset)
+	configParser.set('dataset', 'is_data', str(opts.data))
+	configParser.set('dataset', 'output_file_name', opts.name)
+	configParser.set('dataset', 'output_tree_name', opts.treename)
+
+	configParser.addSection('splitting')
+	configParser.set('splitting', 'split_into', '-1')
+	configParser.set('splitting', 'split_by', -1)
+	
+	configParser.addSection('plugins')
+	pluginList = loadPluginList(opts.pluginList)
+	for plugin in pluginList:
+		configParser.set('plugins', plugin, 'True')
+
+	# Write the config parser object to a file.
+	outputName = opts.outputName
+	if outputName == "":
+		outputName = dataset.rpartition("/")[2]
+	outputName += '.cfg'
+	configParser.write(outputName)
+
+def loadPluginList(filename):
+	pluginNames = []
+	try:
+		if config == "":
+			raise RuntimeError
+		with open(filename) as pluginFile:
+			for line in pluginFile:
+				line = line.rstrip('\n')
+				if not line.lstrip().rstrip() == "" and not line[0] == "#":
+					pluginNames.append(line)
+	except:
+		print "Error reading from plugin list file, or no plugin list file passed."
+		print "Running treemaker-config without specifying a plugin list is probably not what you want!"
+		print "The generated config files will not have plugins. Please rerun with -p [plugin-list]."
+		sys.exit(1)
+	return pluginNames

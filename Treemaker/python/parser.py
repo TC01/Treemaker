@@ -9,7 +9,6 @@ from Treemaker.Treemaker import config
 
 def getParser():
 	parser = optparse.OptionParser()
-	parser.add_option("-c", "--config", dest="config", help="The name of the config file containing all plugin names. This option is required.", default="")
 	parser.add_option("-f", "--force", dest="force", action="store_true", help="If true, delete things and overwrite things.")
 	parser.add_option("-l", "--linear", dest="linear", action="store_true", help="If true, disable multiprocessing.")
 
@@ -35,4 +34,10 @@ def getCondorParser():
 	
 	parser = getParser()
 	
+	return parser
+
+def getConfigParser():
+	parser = getParser()
+	parser.add_option("-p", "--plugin-list", dest="pluginList", help="Newline-separated list of plugins to add to generated config file.", default="")
+	parser.add_option("-o", "--output-name", dest="outputName", help="Name of output file, defaults to name of dataset.", default="")
 	return parser
