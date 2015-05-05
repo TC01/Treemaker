@@ -2,8 +2,7 @@
 Command-line parser, now that that is shared between scripts.
 """
 
-# Used so trees from multiple versions do not get hadd'd together.
-version = "0.3"
+import config
 
 def getParser():
 	parser = optparse.OptionParser()
@@ -13,13 +12,22 @@ def getParser():
 	parser.add_option("-l", "--linear", dest="linear", action="store_true", help="If true, disable multiprocessing.")
 	parser.add_option("-n", "--name", dest="name", help="The name of the output file, defaults to directory name of ntuples.", default="")
 	parser.add_option("-t", "--treename", dest="treename", help="The name of the output TTree object.", default="tree-" + version)
+	
+	parser.add_option('--split-into', dest='splitInto', help="Maximum number of jobs to run in each split.", default=None)
+	parser.add_option('--split-by', dest='splitBy', help="Number of splits to make.", default=None)
+	
 	return parser
 
 def getCLIParser():
 	parser = getParser()
-	# TODO: add job-splitting params.
+
+	parser.add_option('--split-index', dest='splitIndex', help="The nth split to run, using the job-split parameters.", default=None)
+	
 	return parser
 	
 def getCondorParser():
 	# TODO: add condor params.
-	return getParser()
+	
+	parser = getParser()
+	
+	return parser

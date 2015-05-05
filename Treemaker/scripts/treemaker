@@ -16,6 +16,12 @@ def main():
 	treeParser = parser.getParser()
 	(opts, args) = parser.parse_args()
 	
+	# The only positional argument treemaker v3 takes is config file.
+	for arg in args:
+		treemakerConfig = config.readConfigurationFile(arg)
+		
+		core.runTreemaker(treemakerConfig)
+	
 	# Attempt to load plugins from plugin config file.
 	core.loadPlugins(opts.config)
 
