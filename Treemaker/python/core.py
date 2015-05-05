@@ -101,7 +101,7 @@ def runTreemaker(treemakerConfig):
 	data = treemakerConfig.isData
 	linear = treemakerConfig.linear
 	force = treemakerConfig.force
-	treename = treemakerConfig.treename
+	treename = treemakerConfig.treeName
 	plugins.loadPlugins(treemakerConfig.pluginNames)
 	
 	print "*** Running treemaker over " + directory

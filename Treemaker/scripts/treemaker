@@ -9,16 +9,17 @@ import shutil
 import sys
 
 # Our own libraries.
+from Treemaker.Treemaker import config
 from Treemaker.Treemaker import core
 from Treemaker.Treemaker import parser
 
 def main():
 	treeParser = parser.getParser()
-	(opts, args) = parser.parse_args()
+	(opts, args) = treeParser.parse_args()
 	
 	# The only positional argument treemaker v3 takes is config file.
 	for arg in args:
-		treemakerConfig = config.readConfigurationFile(arg)
+		treemakerConfig = config.readConfiguration(arg)
 		treemakerConfig.force = opts.force
 		treemakerConfig.linear = opts.linear
 		core.runTreemaker(treemakerConfig)

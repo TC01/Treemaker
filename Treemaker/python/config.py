@@ -9,7 +9,7 @@ import os
 version = "0.3"
 
 defaultFileName = ''
-defaultConfigName = "tree-" + version
+defaultTreeName = "tree-" + version
 
 class TreemakerConfig:
 	
@@ -21,7 +21,7 @@ class TreemakerConfig:
 		self.force = False
 		self.linear = False
 
-	def parseOption(self, parser, section, option, default, type=None):
+	def parseOption(self, configParser, section, option, default, type=None):
 		result = default
 		try:
 			if type == "int":
@@ -34,14 +34,14 @@ class TreemakerConfig:
 			pass
 		return result
 
-	def setup(self, parser, index):
+	def setup(self, configFile):
 		configParser = ConfigParser.RawConfigParser()
 		configParser.read(configFile)
 
 		# Parse the directory option.
 		try:
 			self.directory = configParser.get('dataset', 'directory')
-			self.directory = os.path.abspath(os.path.expanduser(directory))
+			self.directory = os.path.abspath(os.path.expanduser(self.directory))
 			if not os.path.exists(self.directory):
 				print "Error: directory '" + directory + "' does not exist!"
 				raise RuntimeError
@@ -51,7 +51,7 @@ class TreemakerConfig:
 		# Parse remaining options, using the wrapper method.
 		self.isData = self.parseOption(configParser, 'dataset', 'is_data', False, 'bool')
 		self.fileName = self.parseOption(configParser, 'dataset', 'output_file_name', defaultFileName)
-		self.treeName = self.parseOption(configParser, 'dataset', 'output_tree_name', defaultFileName)
+		self.treeName = self.parseOption(configParser, 'dataset', 'output_tree_name', defaultTreeName)
 		
 		# Parse the splitting options.
 		self.splitInto = self.parseOption(configParser, 'dataset', 'split_into', None, 'int')
@@ -64,7 +64,7 @@ class TreemakerConfig:
 	def readPlugins(self, configParser):
 		self.pluginNames = []
 		try:
-			for name, value in configParser.items('plugins')
+			for name, value in configParser.items('plugins'):
 				if configParser.getboolean('plugins', name):
 					self.pluginNames.append(name)
 		except ConfigParser.NoSectionError:
