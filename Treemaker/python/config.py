@@ -38,6 +38,7 @@ class TreemakerConfig:
 
 	def setup(self, configFile):
 		configParser = ConfigParser.RawConfigParser()
+		configParser.optionxform = str
 		configParser.read(configFile)
 
 		# Parse the directory option.
@@ -74,7 +75,8 @@ class TreemakerConfig:
 
 def writeConfigFile(dataset, opts):
 	configParser = ConfigParser.RawConfigParser()
-	
+	configParser.optionxform = str
+
 	configParser.add_section('dataset')
 	configParser.set('dataset', 'directory', dataset)
 	configParser.set('dataset', 'is_data', str(opts.data))
