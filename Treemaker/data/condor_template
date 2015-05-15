@@ -1,0 +1,19 @@
+universe = vanilla
+executable = batch.sh
+Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000
+Should_Transfer_Files = YES
+WhenToTransferOutput = ON_EXIT
+
+# Change these lines to point at different input file
+# Output is a directory the same name as the input file
+Transfer_Input_Files=gstar_treemaker.py, treemaker, run_treemaker.py, /uscms_data/d3/bjr/frameworks/CMSSW_5_3_14_patch2
+Transfer_Output_Files=output_$(Cluster)_$(Process)
+
+Output = logs/zprime_$(Cluster)_$(Process).stdout
+Error = logs/zprime_$(Cluster)_$(Process).stderr
+Log = logs/zprime_$(Cluster)_$(Process).log
+#notify_user = bjr@fnal.gov
+notification = Never
+
+Arguments = CMSSW_5_3_14_patch2 output_$(Cluster)_$(Process) 
+Queue 1
