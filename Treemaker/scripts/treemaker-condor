@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+# TODO: decouple this code into the libraries.
+
+import os
+import sys
+
+from Treemaker.Treemaker import config
+from Treemaker.Treemaker import parser
+
+template = "/src/Treemaker/Treemaker/data/condor_template"
+
+def main():
+	treeParser = parser.getCondorParser()
+	(opts, args) = treeParser.parse_args()
+	
+	# For the input, create a condor job file.
+	for arg in args:
+		
+		# Get the location of the framework we're running from.
+		try:
+			cmssw = os.environ['CMSSW_BASE']
+		except KeyError:
+			print "Error: CMSSW_BASE is not defined, you must run cmsenv."
+			sys.exit(1)
+		
+		templateFile = os.path.join(cmssw, template)
+		with open(condorFile, 'rb') as condorFile:
+			text = condorFile.read()
+			print text
+	
+		# Run the job if we're supposed to do that.
+		if opts.run:
+			os.system("condor_submit " + outputName)
+
+#Arguments = CMSSW_5_3_14_patch2 output_$(Cluster)_$(Process) SingleMu_2012C /eos/uscms/store/user/bjr/ntuples/data/SingleMu_2012C/diffmo_v3_1_ -d
+#Queue 1
+
+
+if __name__ == '__main__':
+	main()
