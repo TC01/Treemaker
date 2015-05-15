@@ -30,10 +30,8 @@ def getCLIParser():
 	return parser
 	
 def getCondorParser():
-	# TODO: add condor params.
-	
 	parser = getParser()
-	
+	parser.add_option("-r", "--run", dest="run", action="store_true", default=False, help="Whether or not to run the condor job after creating it.")	
 	return parser
 
 def getConfigParser():
