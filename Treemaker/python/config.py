@@ -34,6 +34,8 @@ class TreemakerConfig:
 				result = configParser.get(section, option)
 		except ConfigParser.NoOptionError:
 			pass
+		if type != "int" and type != "bool" and result.lstrip().rstrip() == "":
+			result = default
 		return result
 
 	def setup(self, configFile):
