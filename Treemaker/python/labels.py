@@ -12,12 +12,24 @@ class LabelSubDict(dict):
 	def __init__(self, *args, **kwargs):
 		dict.__init__(self, *args, **kwargs)
 		self.labelTypes = {}
+		self.event = None
+		self.filledMap = {}
 
 	def __getitem__(self, key):
 		value = dict.__getitem__(self, key)
+		handleType = self.labelTypes[key][0]
+		cmsLabel = self.labelTypes[key][1]
+
+		# Implement lazy loading; if this is empty, fill it.
 		if value == -1:
-			value = Handle(self.labelTypes[key])
+			value = Handle(handleType)
 			dict.__setitem__(self, key, value)
+			
+		# Fill the label when requested.
+		if self.event is not None and not self.filledMap[key]:
+			self.event.getByLabel(cmsLabel, value)
+			self.filledMap[key] = True
+
 		return value
 
 def getLabels(ntuple):
@@ -57,17 +69,19 @@ def getLabels(ntuple):
 		module = line[1]
 		label = line[2]
 #		handle = Handle(handleType)
-		labels[module].labelTypes[label] = handleType
+		labels[module].labelTypes[label] = (handleType, (module, label))
 		labels[module][label] = -1
 
 	return labels	
 
 
 def fillLabels(event, labels):
-	for module, subdict in labels.iteritems():
+	for module, labelDict in labels.iteritems():
+		labelDict.event = event
 		for label, handle in subdict.iteritems():
-			cmsLabel = (module, label)
-			event.getByLabel(cmsLabel, handle)
+			labelDict.filledMap[label] = False
+		#	cmsLabel = (module, label)
+		#	event.getByLabel(cmsLabel, handle)
 	return labels
 
 # testing code:
