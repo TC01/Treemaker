@@ -6,6 +6,20 @@ import subprocess
 
 from DataFormats.FWLite import Events, Handle
 
+# Label sub-dictionary, subclass of actual dict. Does lazy loading!
+class LabelSubDict(dict):
+	
+	def __init__(self, *args, **kwargs):
+		dict.__init__(self, *args, **kwargs)
+		self.labelTypes = {}
+
+	def __getitem__(self, key):
+		value = dict.__getitem__(self, key)
+		if value == -1:
+			value = Handle(self.labelTypes[key])
+			dict.__setitem__(self, key, value)
+		return value
+
 def getLabels(ntuple):
 	# Run edmpDumpEventContent using subprocess.
 	process = subprocess.Popen(["edmDumpEventContent", ntuple], stdout=subprocess.PIPE)
@@ -35,15 +49,16 @@ def getLabels(ntuple):
 	# Set up the dictionary tree with the module names.
 	labels = {}
 	for module in modules:
-		labels[module] = {}
+		labels[module] = LabelSubDict()
 
 	# Fill the dictionary tree with the labels and handles.
 	for line in lines:
 		handleType = line[0]
 		module = line[1]
 		label = line[2]
-		handle = Handle(handleType)
-		labels[module][label] = handle
+#		handle = Handle(handleType)
+		labels[module].labelTypes[label] = handleType
+		labels[module][label] = -1
 
 	return labels	
 
