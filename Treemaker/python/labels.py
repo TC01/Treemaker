@@ -78,7 +78,7 @@ def getLabels(ntuple):
 def fillLabels(event, labels):
 	for module, labelDict in labels.iteritems():
 		labelDict.event = event
-		for label, handle in subdict.iteritems():
+		for label, handle in labelDict.iteritems():
 			labelDict.filledMap[label] = False
 		#	cmsLabel = (module, label)
 		#	event.getByLabel(cmsLabel, handle)
