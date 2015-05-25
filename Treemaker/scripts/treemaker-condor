@@ -28,7 +28,7 @@ def main():
 			arguments += "-f "
 		if opts.linear:
 			arguments += "-l "
-		arguments += arg
+		arguments += arg.split("/")[-1]
 		jobName = arg.split("/")[-1].partition(".")[0]
 		outputName = jobName		
 
@@ -61,14 +61,14 @@ def main():
 		os.mkdir(os.path.join(jobPath, "logs"))
 
 		text = text.replace("$EXECUTABLE", os.path.join(jobPath, scriptFilename))
-		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + cmssw + ", " + os.path.abspath(arg))
+		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + os.path.abspath(arg))
 		
 		# Write the files to the job directory.
 		with open(os.path.join(jobPath, outputName), 'wb') as jobFile:
 			jobFile.write(text)
 		with open(os.path.join(jobPath, argsFilename), 'wb') as argsFile:
 			argsFile.write("#!/bin/tcsh\n")
-			argsFile.write("setenv CLI_ARGS " + arguments + "\n")
+			argsFile.write("setenv ARGUMENTS " + arguments + "\n")
 			argsFile.write("setenv CMSSW_RELEASE " + cmsswVersion + "\n")
 		shutil.copy(os.path.join(cmssw, templateScript), os.path.join(jobPath, scriptFilename))
 
