@@ -61,7 +61,7 @@ def main():
 		os.mkdir(os.path.join(jobPath, "logs"))
 
 		text = text.replace("$EXECUTABLE", os.path.join(jobPath, scriptFilename))
-		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + cmssw)
+		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + cmssw + ", " + os.path.abspath(arg))
 		
 		# Write the files to the job directory.
 		with open(os.path.join(jobPath, outputName), 'wb') as jobFile:
