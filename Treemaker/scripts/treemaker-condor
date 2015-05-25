@@ -13,6 +13,7 @@ from Treemaker.Treemaker import parser
 
 template = "src/Treemaker/Treemaker/data/condor_template"
 templateScript = "src/Treemaker/Treemaker/data/condor_script.sh"
+outputScript = "src/Treemaker/Treemaker/data/hadd_output.py"
 argsFilename = "job_params"
 scriptFilename = "condor_script.sh"
 
@@ -71,7 +72,7 @@ def main():
 		for i in range(numJobs):
 			text += "Arguments = output_$(Cluster)_$(Process)"
 			if numJobs > 1:
-				text += " '--split-index " + str(i) + "'"
+				text += " --split-index " + str(i)
 			text += "\n"
 			text += "Queue 1\n\n"
 
@@ -96,6 +97,7 @@ def main():
 			argsFile.write("setenv ARGUMENTS " + arguments + "\n")
 			argsFile.write("setenv CMSSW_RELEASE " + cmsswVersion + "\n")
 		shutil.copy(os.path.join(cmssw, templateScript), os.path.join(jobPath, scriptFilename))
+		shutil.copy(os.path.join(cmssw, outputScript), os.path.join(jobPath))
 
 		# Run the job if we're supposed to do that.
 		if opts.run:

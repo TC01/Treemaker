@@ -26,7 +26,7 @@ def main():
 		sys.exit(1)
 	else:
 		# Job splitting always begins with IndexX.
-		outputName = outputFiles[0][len("Index0"):]
+		outputName = outputFiles[0].split("/")[-1][len("Index0_"):]
 		os.system("hadd " + outputName + " output_*/*.root")
 
 	# Clean up and remove the output_* directories.
