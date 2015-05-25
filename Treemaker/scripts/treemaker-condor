@@ -8,7 +8,7 @@ import sys
 from Treemaker.Treemaker import config
 from Treemaker.Treemaker import parser
 
-template = "/src/Treemaker/Treemaker/data/condor_template"
+template = "src/Treemaker/Treemaker/data/condor_template"
 
 def main():
 	treeParser = parser.getCondorParser()
@@ -25,7 +25,7 @@ def main():
 			sys.exit(1)
 		
 		templateFile = os.path.join(cmssw, template)
-		with open(condorFile, 'rb') as condorFile:
+		with open(templateFile, 'rb') as condorFile:
 			text = condorFile.read()
 			print text
 	
