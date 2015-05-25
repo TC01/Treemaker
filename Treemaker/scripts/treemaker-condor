@@ -27,10 +27,6 @@ def main():
 		if opts.splitInto > 0 and opts.splitBy > 0:
 			print "Error: cannot set both splitInto and splitBy, please specify one or the other."
 			sys.exit(1)
-		if opts.splitInto > 0:
-			treemakerConfig.splitInto = opts.splitInto
-		if opts.splitBy > 0:
-			treemakerConfig.splitBy = opts.splitBy
 		
 		# Write the arguments string, containing any CLI overrides
 		arguments = "' "
@@ -38,6 +34,12 @@ def main():
 			arguments += "-f "
 		if opts.linear:
 			arguments += "-l "
+		if opts.splitInto > 0:
+			treemakerConfig.splitInto = opts.splitInto
+			arguments += "--split-into " + str(opts.splitInto) + " "
+		if opts.splitBy > 0:
+			treemakerConfig.splitBy = opts.splitBy
+			arguments += "--split-by " + str(opts.splitBy) + " "
 		arguments += arg.split("/")[-1] + "'"
 		jobName = arg.split("/")[-1].partition(".")[0]
 		outputName = jobName		
@@ -69,7 +71,7 @@ def main():
 		for i in range(numJobs):
 			text += "Arguments = output_$(Cluster)_$(Process)"
 			if numJobs > 1:
-				text += " --split-index " + str(i)
+				text += " '--split-index " + str(i) + "'"
 			text += "\n"
 			text += "Queue 1\n\n"
 
