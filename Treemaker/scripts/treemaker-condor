@@ -3,6 +3,7 @@
 # TODO: decouple this code into the libraries.
 
 import os
+import shutil
 import sys
 
 from Treemaker.Treemaker import config
@@ -28,8 +29,9 @@ def main():
 		if opts.linear:
 			arguments += "-l "
 		arguments += arg
-		jobName = arg
-		
+		jobName = arg.split("/")[-1].partition(".")[0]
+		outputName = jobName		
+
 		# Get the location of the framework we're running from.
 		try:
 			cmssw = os.environ['CMSSW_BASE']
@@ -50,18 +52,21 @@ def main():
 
 		jobPath = os.path.join(os.getcwd(), jobName)
 		if os.path.exists(jobPath):
-			print "Error: Job folder " + jobPath + " already exists, please remove it."
-			sys.exit(1)
+			if opts.force:
+				shutil.rmtree(jobPath)
+			else:
+				print "Error: Job folder " + jobPath + " already exists, please remove it."
+				sys.exit(1)
 		os.mkdir(jobPath)
 		os.mkdir(os.path.join(jobPath, "logs"))
 
-		text.replace("$EXECUTABLE", os.path.join(jobPath, scriptFilename))
-		text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename), cmssw)
+		text = text.replace("$EXECUTABLE", os.path.join(jobPath, scriptFilename))
+		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + cmssw)
 		
 		# Write the files to the job directory.
-		with open(os.path.join(jobPath, outputName)) as jobFile:
+		with open(os.path.join(jobPath, outputName), 'wb') as jobFile:
 			jobFile.write(text)
-		with open(os.path.join(jobPath, argsFilename)) as argsFile:
+		with open(os.path.join(jobPath, argsFilename), 'wb') as argsFile:
 			argsFile.write("#!/bin/tcsh\n")
 			argsFile.write("setenv CLI_ARGS " + arguments + "\n")
 			argsFile.write("setenv CMSSW_RELEASE " + cmsswVersion + "\n")
