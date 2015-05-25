@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 # TODO: decouple this code into the libraries.
+# Or at least functions.
 
+import math
 import os
 import shutil
 import sys
@@ -21,6 +23,14 @@ def main():
 	# For the input, create a condor job file.
 	for arg in args:
 		treemakerConfig = config.TreemakerConfig(arg)
+		
+		if opts.splitInto > 0 and opts.splitBy > 0:
+			print "Error: cannot set both splitInto and splitBy, please specify one or the other."
+			sys.exit(1)
+		if opts.splitInto > 0:
+			treemakerConfig.splitInto = opts.splitInto
+		if opts.splitBy > 0:
+			treemakerConfig.splitBy = opts.splitBy
 		
 		# Write the arguments string, containing any CLI overrides
 		arguments = "' "
@@ -44,10 +54,23 @@ def main():
 		with open(templateFile, 'rb') as condorFile:
 			text = condorFile.read()
 
-		# Program splitting support later.
+		# Job-splitting support.
 		numJobs = 1
+		if treemakerConfig.splitInto > 0:
+			# dammit, this code is being reused, this should be made better.
+			ntuples = []
+			for path, dirs, files in os.walk(directory):
+				if path == directory:
+					for ntuple in files:
+						ntuples.append(ntuple)
+			numJobs = int(math.ceil(len(ntuples) / float(treemakerConfig.splitInto)))
+		if treemakerConfig.splitBy > 0:
+			numJobs = treemakerConfig.splitBy
 		for i in range(numJobs):
-			text += "Arguments = output_$(Cluster)_$(Process)\n"
+			text += "Arguments = output_$(Cluster)_$(Process)"
+			if numJobs > 1:
+				text += " --split-index " + str(i)
+			text += "\n"
 			text += "Queue 1\n\n"
 
 		jobPath = os.path.join(os.getcwd(), jobName)
