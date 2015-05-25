@@ -9,6 +9,9 @@ from Treemaker.Treemaker import config
 from Treemaker.Treemaker import parser
 
 template = "src/Treemaker/Treemaker/data/condor_template"
+templateScript = "src/Treemaker/Treemaker/data/condor_script.sh"
+argsFilename = "job_params"
+scriptFilename = "condor_script.sh"
 
 def main():
 	treeParser = parser.getCondorParser()
@@ -16,10 +19,21 @@ def main():
 	
 	# For the input, create a condor job file.
 	for arg in args:
+		treemakerConfig = config.TreemakerConfig(arg)
+		
+		# Write the arguments string, containing any CLI overrides
+		arguments = " "
+		if opts.force:
+			arguments += "-f "
+		if opts.linear:
+			arguments += "-l "
+		arguments += arg
+		jobName = arg
 		
 		# Get the location of the framework we're running from.
 		try:
 			cmssw = os.environ['CMSSW_BASE']
+			cmsswVersion = cmssw.split("/")[-1]
 		except KeyError:
 			print "Error: CMSSW_BASE is not defined, you must run cmsenv."
 			sys.exit(1)
@@ -27,15 +41,35 @@ def main():
 		templateFile = os.path.join(cmssw, template)
 		with open(templateFile, 'rb') as condorFile:
 			text = condorFile.read()
-			print text
-	
+
+		# Program splitting support later.
+		numJobs = 1
+		for i in range(numJobs):
+			text += "Arguments = output_$(Cluster)_$(Process)\n"
+			text += "Queue 1\n\n"
+
+		jobPath = os.path.join(os.getcwd(), jobName)
+		if os.path.exists(jobPath):
+			print "Error: Job folder " + jobPath + " already exists, please remove it."
+			sys.exit(1)
+		os.mkdir(jobPath)
+		os.mkdir(os.path.join(jobPath, "logs"))
+
+		text.replace("$EXECUTABLE", os.path.join(jobPath, scriptFilename))
+		text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename), cmssw)
+		
+		# Write the files to the job directory.
+		with open(os.path.join(jobPath, outputName)) as jobFile:
+			jobFile.write(text)
+		with open(os.path.join(jobPath, argsFilename)) as argsFile:
+			argsFile.write("#!/bin/tcsh\n")
+			argsFile.write("setenv CLI_ARGS " + arguments + "\n")
+			argsFile.write("setenv CMSSW_RELEASE " + cmsswVersion + "\n")
+		shutil.copy(os.path.join(cmssw, templateScript), os.path.join(jobPath, scriptFilename))
+
 		# Run the job if we're supposed to do that.
 		if opts.run:
-			os.system("condor_submit " + outputName)
-
-#Arguments = CMSSW_5_3_14_patch2 output_$(Cluster)_$(Process) SingleMu_2012C /eos/uscms/store/user/bjr/ntuples/data/SingleMu_2012C/diffmo_v3_1_ -d
-#Queue 1
-
+			os.system("condor_submit " + os.path.join(jobPath, outputName))
 
 if __name__ == '__main__':
 	main()

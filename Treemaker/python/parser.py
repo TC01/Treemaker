@@ -4,7 +4,6 @@ Command-line parser, now that that is shared between scripts.
 
 import optparse
 
-
 from Treemaker.Treemaker import config
 
 def getParser():
