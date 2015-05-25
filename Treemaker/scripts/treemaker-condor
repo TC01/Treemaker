@@ -23,12 +23,12 @@ def main():
 		treemakerConfig = config.TreemakerConfig(arg)
 		
 		# Write the arguments string, containing any CLI overrides
-		arguments = " "
+		arguments = "' "
 		if opts.force:
 			arguments += "-f "
 		if opts.linear:
 			arguments += "-l "
-		arguments += arg.split("/")[-1]
+		arguments += arg.split("/")[-1] + "'"
 		jobName = arg.split("/")[-1].partition(".")[0]
 		outputName = jobName		
 
@@ -74,7 +74,7 @@ def main():
 
 		# Run the job if we're supposed to do that.
 		if opts.run:
-			os.system("condor_submit " + os.path.join(jobPath, outputName))
+			os.system("cd " + jobPath + " && condor_submit " + os.path.join(jobPath, outputName))
 
 if __name__ == '__main__':
 	main()
