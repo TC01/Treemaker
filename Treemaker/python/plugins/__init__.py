@@ -30,13 +30,11 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 						names.append(filename)
 	return names
 
-def loadPlugins(namesToLoad, useAll=False):
+def loadPlugins(pluginNames):
 	global plugins
 	
 	# Get a list of all possible plugin names
-	if useAll:
-		namesToLoad = []
-	names = getPossiblePluginNames(namesToLoad)
+	names = getPossiblePluginNames(pluginNames.keys())
 	pluginDict = {}
 
 	# Now, use imp to load all the plugins we specified
@@ -56,11 +54,16 @@ def loadPlugins(namesToLoad, useAll=False):
 					fp.close()
 
 	# Sort plugins to make sure they got loaded in the right order.
-	i = 0
-	for pluginName in namesToLoad:
-		print "*** Loading " + pluginName
-		plugins[i] = pluginDict[pluginName]
-		i += 1
+	# Order is priority as specified in config file.
+	plugins = sorted(pluginDict, key = lamba priority(name): pluginNames[name])
+	
+	# If we choose to implement plugin dependencies, that should now be done.
+	
+#	i = 0
+#	for pluginName, priority in pluginNames:
+#		print "*** Loading " + pluginName
+#		plugins[i] = pluginDict[pluginName]
+#		i += 1
 
 	# Deal with unloaded plugins.
 	# This should be a failure conditional.

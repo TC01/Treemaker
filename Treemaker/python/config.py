@@ -67,11 +67,12 @@ class TreemakerConfig:
 		self.readPlugins(configParser)
 	
 	def readPlugins(self, configParser):
-		self.pluginNames = []
+		self.plugins = {}
 		try:
 			for name, value in configParser.items('plugins'):
-				if configParser.getboolean('plugins', name):
-					self.pluginNames.append(name)
+				integer = configParser.getint('plugins', name)
+				if integer > 0:
+					self.pluginNames[name] = integer
 		except ConfigParser.NoSectionError:
 			print "Error: Config file must have a 'plugins' section!"
 
