@@ -93,11 +93,14 @@ def writeConfigFile(dataset, opts):
 		sys.exit(1)
 	configParser.set('splitting', 'split_into', opts.splitInto)
 	configParser.set('splitting', 'split_by', opts.splitBy)
-	
+
+	# Assume priorites are strictly increasing based on order in load file.	
 	configParser.add_section('plugins')
 	pluginList = loadPluginList(opts.pluginList)
-	for plugin in pluginList:
-		configParser.set('plugins', plugin, 'True')
+	for i in xrange(len(pluginList)):
+		priority = i + 1
+		plugin = pluginList[i]
+		configParser.set('plugins', plugin, str(priority))
 
 	# Write the config parser object to a file.
 	outputName = opts.outputName
