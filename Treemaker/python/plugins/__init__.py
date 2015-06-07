@@ -65,7 +65,7 @@ def loadPlugins(pluginNames):
 	# Deal with unloaded plugins.
 	# This should be a failure conditional.
 	if len(pluginNames) != len(plugins):
-		for name in namesToLoad:
+		for name in pluginNames.keys():
 			if not name in pluginDict.keys():
 				print "ERROR: unable to load plugin " + name
 		sys.exit(1)
