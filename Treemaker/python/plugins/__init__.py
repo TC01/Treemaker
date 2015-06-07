@@ -55,19 +55,16 @@ def loadPlugins(pluginNames):
 
 	# Sort plugins to make sure they got loaded in the right order.
 	# Order is priority as specified in config file.
-	plugins = sorted(pluginDict, key = lamba priority(name): pluginNames[name])
-	
+	pluginOrder = sorted(pluginDict, key = lambda name: pluginNames[name])
+	for i in xrange(len(pluginOrder)):
+		print "*** Loading " + pluginOrder[i]
+		plugins[i] = pluginDict[pluginOrder[i]]
+
 	# If we choose to implement plugin dependencies, that should now be done.
-	
-#	i = 0
-#	for pluginName, priority in pluginNames:
-#		print "*** Loading " + pluginName
-#		plugins[i] = pluginDict[pluginName]
-#		i += 1
 
 	# Deal with unloaded plugins.
 	# This should be a failure conditional.
-	if len(namesToLoad) != len(plugins):
+	if len(pluginNames) != len(plugins):
 		for name in namesToLoad:
 			if not name in pluginDict.keys():
 				print "ERROR: unable to load plugin " + name

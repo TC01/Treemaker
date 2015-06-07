@@ -67,7 +67,7 @@ class TreemakerConfig:
 		self.readPlugins(configParser)
 	
 	def readPlugins(self, configParser):
-		self.plugins = {}
+		self.pluginNames = {}
 		try:
 			for name, value in configParser.items('plugins'):
 				integer = configParser.getint('plugins', name)
