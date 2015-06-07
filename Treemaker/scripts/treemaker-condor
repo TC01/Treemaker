@@ -11,6 +11,7 @@ import sys
 from Treemaker.Treemaker import config
 from Treemaker.Treemaker import parser
 
+pluginDir = "src/Treemaker/Treemaker/python/plugins"
 template = "src/Treemaker/Treemaker/data/condor_template"
 templateScript = "src/Treemaker/Treemaker/data/condor_script.sh"
 outputScript = "src/Treemaker/Treemaker/data/hadd_output.py"
@@ -87,7 +88,8 @@ def main():
 		os.mkdir(os.path.join(jobPath, "logs"))
 
 		text = text.replace("$EXECUTABLE", os.path.join(jobPath, scriptFilename))
-		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + os.path.abspath(arg))
+		text = text.replace("$INPUT_FILES", os.path.join(jobPath, argsFilename) + ", " + os.path.abspath(arg) + ", $PLUGIN_PATH")
+		text = text.replace("$PLUGIN_PATH", os.path.join(cmssw, pluginDir))
 		
 		# Write the files to the job directory.
 		with open(os.path.join(jobPath, outputName), 'wb') as jobFile:

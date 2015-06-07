@@ -1,13 +1,16 @@
 universe = vanilla
 executable = $EXECUTABLE
-Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000
+Requirements = OpSys == "LINUX" && (Arch != "DUMMY")
+# These values came from an old condor example and maybe are wrong.
+request_disk = 1000000
+request_memory = 199
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 
 Transfer_Input_Files=$INPUT_FILES
 Transfer_Output_Files=output_$(Cluster)_$(Process)
 
-Output = logs/zprime_$(Cluster)_$(Process).stdout
-Error = logs/zprime_$(Cluster)_$(Process).stderr
-Log = logs/zprime_$(Cluster)_$(Process).log
+Output = logs/log_$(Cluster)_$(Process).stdout
+Error = logs/log_$(Cluster)_$(Process).stderr
+Log = logs/log_$(Cluster)_$(Process).log
 notification = Never
