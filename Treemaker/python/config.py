@@ -16,6 +16,9 @@ class TreemakerConfig:
 	
 	def __init__(self, configFileName):
 		self.configFileName = configFileName
+		if not os.path.exists(configFileName):
+			print "Error: tried to read a config file (" + configFileName + ") that did not exist!"
+			sys.exit(1)
 		self.setup(configFileName)
 
 		# Command line options.
