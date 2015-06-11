@@ -77,16 +77,16 @@ def setup(variables, isData):
 		variables = jets[i].setup(variables)
 	return variables
 
-def createCuts(cuts):
-	return cuts
+def createCuts(cutArray):
+	return cutArray
 	
 def analyze(event, variables, labels, isData):
 	for jet in jets:
 		variables = jet.analyze(variables, labels)
 	return variables
 	
-def makeCuts(event, variables, cuts, labels, isData):
-	return cuts
+def makeCuts(event, variables, cutArray, labels, isData):
+	return cutArray
 	
 def reset(variables):
 	for jet in jets:

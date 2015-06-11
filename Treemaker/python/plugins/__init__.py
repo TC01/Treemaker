@@ -73,10 +73,10 @@ def loadPlugins(pluginNames):
 	# Then return plugins, just in case.
 	return plugins
 
-def createCutsPlugins(cuts):
+def createCutsPlugins(cutArray):
 	for plugin in plugins:
-		cuts = plugin.createCuts(cuts)
-	return cuts
+		cutArray = plugin.createCuts(cutArray)
+	return cutArray
 
 def setupPlugins(variables, isData):
 	for plugin in plugins:
