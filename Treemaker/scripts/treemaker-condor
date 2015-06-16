@@ -64,9 +64,10 @@ def main():
 			# dammit, this code is being reused, this should be made better.
 			ntuples = []
 			for path, dirs, files in os.walk(directory):
-				if path == directory:
-					for ntuple in files:
-						ntuples.append(ntuple)
+#				if path == directory:
+				for ntuple in files:
+					if '.root' in ntuple:
+						ntuples.append(os.path.join(path, ntuple))
 			numJobs = int(math.ceil(len(ntuples) / float(treemakerConfig.splitInto)))
 		if treemakerConfig.splitBy > 0:
 			numJobs = treemakerConfig.splitBy

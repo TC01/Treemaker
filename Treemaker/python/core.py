@@ -152,20 +152,21 @@ def runTreemaker(treemakerConfig):
 	pool = multiprocessing.Pool()
 	results = []
 	
-	# Accumulate a list of files. NO SUBDIRECTORIES, I may change my mind on this one
-	# once I consider how the sorting should happen.
+	# Accumulate a list of files. Subdirectories are okay.
 	ntuples = []
 	for path, dirs, files in os.walk(directory):
-		if path == directory:
-			for ntuple in files:
-				ntuples.append(ntuple)
+#		if path == directory:
+		for ntuple in files:
+			if '.root' in ntuple:
+				ntuples.append(os.path.join(path, ntuple))
 
 	# Do splitting.
 	ntuples = sorted(ntuples)
 	splitNtuples = doSplitting(ntuples, index, treemakerConfig.splitBy, treemakerConfig.splitInto)
 
 	for ntuple in splitNtuples:
-		workingNtuple = os.path.join(path, ntuple)
+#		workingNtuple = os.path.join(path, ntuple)
+		workingNtuple = ntuple
 		if linear:
 			runOverNtuple(workingNtuple, outputDir, treename)
 		else:

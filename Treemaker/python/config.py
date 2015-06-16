@@ -108,7 +108,7 @@ def writeConfigFile(dataset, opts):
 	# Write the config parser object to a file.
 	outputName = opts.outputName
 	if outputName == "":
-		outputName = dataset.rpartition("/")[2]
+		outputName = dataset.rstrip('/').split("/")[-1]
 	if not '.cfg' in outputName:
 		outputName += '.cfg'
 	with open(outputName, 'wb') as outputFile:
