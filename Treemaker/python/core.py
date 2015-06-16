@@ -52,9 +52,12 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 	labelDict = labels.getLabels(ntuple)
 	
 	# Set up branches for all variables declared by loaded plugins.
+	# Do this setup in sorted alphabetical order by variable name.
 	variables = {}
 	variables = plugins.setupPlugins(variables, data)
-	for varName, varArray in variables.iteritems():
+	sortedVarNames = sorted(variables)
+	for varName in sortedVarNames:
+		varArray = variables[varName]
 		tree.Branch(varName, varArray, varName + '/F')
 
 	# Create the cuts array.
