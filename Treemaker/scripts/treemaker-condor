@@ -63,7 +63,7 @@ def main():
 		if treemakerConfig.splitInto > 0:
 			# dammit, this code is being reused, this should be made better.
 			ntuples = []
-			for path, dirs, files in os.walk(directory):
+			for path, dirs, files in os.walk(treemakerConfig.directory):
 #				if path == directory:
 				for ntuple in files:
 					if '.root' in ntuple:
