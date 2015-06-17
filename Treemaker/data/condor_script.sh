@@ -28,3 +28,4 @@ $CMSSW_RELEASE/src/Treemaker/Treemaker/scripts/treemaker $ARGUMENTS $SPLIT_INDEX
 cd $_CONDOR_SCRATCH_DIR
 cd $OUTPUT_DIR
 cp $_CONDOR_SCRATCH_DIR/*.root ./
+cp $_CONDOR_SCRATCH_DIR/*.txt ./
