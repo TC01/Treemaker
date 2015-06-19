@@ -4,6 +4,7 @@ The core of Treemaker, implemented inside the library.
 
 # Python standard library.
 import array
+import math
 import multiprocessing
 import optparse
 import os
@@ -99,18 +100,18 @@ def doSplitting(ntuples, index, splitBy, splitInto):
 	numNtuples = len(ntuples)
 	# These cases should be mutually exclusive.
 	if splitBy > 0:
-		startJobs = (numNtuples / splitBy) * index
-		endJobs = (numNtuples / splitBy) * (index + 1) - 1
+		startJobs = int(math.ceil(numNtuples / float(splitBy))) * index
+		endJobs = int(math.ceil(numNtuples / float(splitBy))) * (index + 1)
 		if index + 1 > splitBy:
 			print "Error: cannot make this splitting with index + 1 > number of splits!"
 			sys.exit(1)
 	elif splitInto > 0:
 		startJobs = splitInto * index
-		endJobs = splitInto * (index + 1) - 1
+		endJobs = splitInto * (index + 1)
 
 	if splitBy > 0 or splitInto > 0:
-		if endJobs >= len(ntuples):
-			endJobs = len(ntuple) - 1
+		if endJobs > len(ntuples):
+			endJobs = len(ntuples)
 		return ntuples[startJobs:endJobs]
 	else:
 		return ntuples
@@ -171,7 +172,7 @@ def runTreemaker(treemakerConfig):
 #		workingNtuple = os.path.join(path, ntuple)
 		workingNtuple = ntuple
 		if linear:
-			runOverNtuple(workingNtuple, outputDir, treename)
+			runOverNtuple(workingNtuple, outputDir, treename, data)
 		else:
 			result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, data, ))
 			results.append(result)
