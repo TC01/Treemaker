@@ -20,6 +20,7 @@ from DataFormats.FWLite import Events, Handle
 import numpy
 
 # Our own libraries.
+from Treemaker.Treemaker import cuts
 from Treemaker.Treemaker import labels
 from Treemaker.Treemaker import plugins
 
@@ -62,32 +63,32 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 		tree.Branch(varName, varArray, varName + '/F')
 
 	# Create the cuts array.
-	cuts = {}
-	cuts = plugins.createCutsPlugins(cuts)
+	cutDict = {}
+	cutDict = plugins.createCutsPlugins(cutDict)
 	# For reasons that I'm sure I'd rather not know, this does not work.
 	# Despite the fact that I lifted this line from writeEvents, my old
 	# treemaker/converter I wrote back in 2013... I hate everything.
 #	cutArray = numpy.zeros(len(cuts))
-	cutArray = array.array('i', [0] * len(cuts))
-	tree.Branch("cuts", cutArray, "cuts[" + str(len(cuts)) + "]/I")
+	cutArray = array.array('i', [0] * len(cutDict))
+	tree.Branch("cuts", cutArray, "cuts[" + str(len(cutDict)) + "]/I")
 	# We care about order here so it's consistent.
-	ordered = sorted(cuts, key=cuts.get)
+	ordered = sorted(cutDict, key=cutDict.get)
 	for i in xrange(len(ordered)):
 		name = ordered[i]
-		cuts[name].index = i
+		cutDict[name].index = i
 		
 	# Now, run over all events.
 	for event in Events(ntuple):
 		labelDict = labels.fillLabels(event, labelDict)
 		variables = plugins.analyzePlugins(event, variables, labelDict, data)
 
-		cuts = plugins.makeCutsPlugins(event, variables, cuts, labelDict, data)
-		for name, cut in cuts.iteritems():
+		cutDict = plugins.makeCutsPlugins(event, variables, cutDict, labelDict, data)
+		for name, cut in cutDict.iteritems():
 			cutArray[cut.index] = cut.passed
 
 		tree.Fill()
 		variables = plugins.resetPlugins(variables)
-		for name, cut in cuts.iteritems():
+		for name, cut in cutDict.iteritems():
 			cutArray[cut.index] = 0
 
 	output.cd()
