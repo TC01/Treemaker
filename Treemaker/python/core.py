@@ -16,13 +16,15 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
-# Other.
-import numpy
-
 # Our own libraries.
 from Treemaker.Treemaker import cuts
 from Treemaker.Treemaker import labels
 from Treemaker.Treemaker import plugins
+
+# Perhaps this should be configurable, but a 'timeout' for the treemaker.
+# If your jobs take longer than 12 hours to run, please make use of the
+# splitting commands. :)
+treemakerTimeout = 43200	# (60 * 60 * 12) seconds
 
 def loadPlugins(config):
 	pluginNames = []
@@ -180,6 +182,8 @@ def runTreemaker(treemakerConfig):
 
 	pool.close()
 	pool.join()
+	for result in results:
+		result.get(timeout=treemakerTimeout)
 
 	# For now use os.system to run hadd, we should figure out a better way.
 	# But this works, so...
