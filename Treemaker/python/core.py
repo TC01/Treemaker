@@ -187,20 +187,7 @@ def runTreemaker(treemakerConfig):
 		haddCommand += " -f "
 	os.system(haddCommand + name + " " + outputDir + "/*")
 
-	# We can rely on the ordering here to make things be the same order
-	# as they were in the subprocesses, to generate a report.
-	cuts = {}
-	cuts = plugins.createCutsPlugins(cuts)	
-	ordered = sorted(cuts, key=cuts.get)
-	for i in xrange(len(ordered)):
-		cutName = ordered[i]
-		cuts[cutName].index = i
-
 	# Generate output cuts report.
-	# TODO: store inside the tree itself.
-	reportName = name.partition(".")[0] + "_cuts_report.txt"
-	with open(reportName, 'wb') as report:
-		for cutName, cut in cuts.iteritems():
-			report.write(str(cut) + "\n")
+	cuts.writeCutsReport(plugins, name)
 
 	shutil.rmtree(outputDir)

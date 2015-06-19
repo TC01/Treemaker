@@ -17,3 +17,24 @@ class Cut:
 
 	def __repr__(self):
 		return self.__str()
+
+def writeCutsReport(plugins, name = None):
+	"""	Helper method to write out a 'cut report' of the indexes and names of
+		the cuts. If no name is given, writes to standard output."""
+
+	# We can rely on the ordering here to make things be the same order.
+	cutArray = {}
+	cuts = plugins.createCutsPlugins(cutArray)
+	ordered = sorted(cuts, key=cuts.get)
+	for i in xrange(len(ordered)):
+		cutName = ordered[i]
+		cuts[cutName].index = i
+	
+	if name is None:
+		for cutName, cut in cuts.iteritems():
+			print cut
+	else:
+		reportName = name.partition(".")[0] + "_cuts_report.txt"
+		with open(reportName, 'wb') as report:
+			for cutName, cut in cuts.iteritems():
+				report.write(str(cut) + "\n")

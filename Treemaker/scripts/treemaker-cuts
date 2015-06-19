@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-# Helper script that only prints out the cut report.
-
 # Python standard library.
 import array
 import multiprocessing
@@ -12,9 +10,8 @@ import sys
 
 # Our own libraries.
 from Treemaker.Treemaker import config
-from Treemaker.Treemaker import cuts
+from Treemaker.Treemaker import core
 from Treemaker.Treemaker import parser
-from Treemaker.Treemaker import plugins
 
 def main():
 	treeParser = parser.getCLIParser()
@@ -23,10 +20,22 @@ def main():
 	# The only positional argument treemaker v3 takes is config file.
 	for arg in args:
 		treemakerConfig = config.TreemakerConfig(arg)
-		plugins.loadPlugins(treemakerConfig.pluginNames)
-		print "Cuts that will be generated for config file " + arg + ":"
-		cuts.writeCutsReport(plugins)
 
+
+		core.runTreemaker(treemakerConfig)
+	
+	# Old code.
+	
+	# Attempt to load plugins from plugin config file.
+	#core.loadPlugins(opts.config)
+
+	# Run the treemaker over all provided directories.
+	#for arg in args:
+	#	directory = os.path.abspath(arg)
+	#	if not os.path.exists(directory):
+	#		print "Error: no such directory: " + arg
+	#		sys.exit(1)
+	#	core.runTreemaker(directory, opts.treename, opts.data, opts.force, opts.name, opts.linear)
 
 if __name__ == '__main__':
 	main()
