@@ -47,57 +47,58 @@ def loadPlugins(config):
 	plugins.loadPlugins(pluginNames)
 
 def runOverNtuple(ntuple, outputDir, treename, data=False):
-	print "**** Processing ntuple: " + ntuple
-	outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
-	output = ROOT.TFile(outputName, "RECREATE")
-	tree = ROOT.TTree(treename, treename)
 
-	# Create the label dictionary.
-	labelDict = labels.getLabels(ntuple)
+	try:
+		print "**** Processing ntuple: " + ntuple
+		outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
+		output = ROOT.TFile(outputName, "RECREATE")
+		tree = ROOT.TTree(treename, treename)
 	
-	# Set up branches for all variables declared by loaded plugins.
-	# Do this setup in sorted alphabetical order by variable name.
-	variables = {}
-	variables = plugins.setupPlugins(variables, data)
-	sortedVarNames = sorted(variables)
-	for varName in sortedVarNames:
-		varArray = variables[varName]
-		tree.Branch(varName, varArray, varName + '/F')
+		# Create the label dictionary.
+		labelDict = labels.getLabels(ntuple)
+	
+		# Set up branches for all variables declared by loaded plugins.
+		# Do this setup in sorted alphabetical order by variable name.
+		variables = {}
+		variables = plugins.setupPlugins(variables, data)
+		sortedVarNames = sorted(variables)
+		for varName in sortedVarNames:
+			varArray = variables[varName]
+			tree.Branch(varName, varArray, varName + '/F')
 
-	# Create the cuts array.
-	cutDict = {}
-	cutDict = plugins.createCutsPlugins(cutDict)
-	# For reasons that I'm sure I'd rather not know, this does not work.
-	# Despite the fact that I lifted this line from writeEvents, my old
-	# treemaker/converter I wrote back in 2013... I hate everything.
-#	cutArray = numpy.zeros(len(cuts))
-	cutArray = array.array('i', [0] * len(cutDict))
-	tree.Branch("cuts", cutArray, "cuts[" + str(len(cutDict)) + "]/I")
-	# We care about order here so it's consistent.
-	ordered = sorted(cutDict, key=cutDict.get)
-	for i in xrange(len(ordered)):
-		name = ordered[i]
-		cutDict[name].index = i
+		# Create the cuts array.
+		cutDict = {}
+		cutDict = plugins.createCutsPlugins(cutDict)
+		cutArray = array.array('i', [0] * len(cutDict))
+		tree.Branch("cuts", cutArray, "cuts[" + str(len(cutDict)) + "]/I")
+		# We care about order here so it's consistent.
+		ordered = sorted(cutDict, key=cutDict.get)
+		for i in xrange(len(ordered)):
+			name = ordered[i]
+			cutDict[name].index = i
 		
-	# Now, run over all events.
-	for event in Events(ntuple):
-		labelDict = labels.fillLabels(event, labelDict)
-		variables = plugins.analyzePlugins(event, variables, labelDict, data)
+		# Now, run over all events.
+		for event in Events(ntuple):
+			labelDict = labels.fillLabels(event, labelDict)
+			variables = plugins.analyzePlugins(event, variables, labelDict, data)
+	
+			cutDict = plugins.makeCutsPlugins(event, variables, cutDict, labelDict, data)
+			for name, cut in cutDict.iteritems():
+				cutArray[cut.index] = cut.passed
 
-		cutDict = plugins.makeCutsPlugins(event, variables, cutDict, labelDict, data)
-		for name, cut in cutDict.iteritems():
-			cutArray[cut.index] = cut.passed
+			tree.Fill()
+			variables = plugins.resetPlugins(variables)
+			for name, cut in cutDict.iteritems():
+				cutArray[cut.index] = 0
 
-		tree.Fill()
-		variables = plugins.resetPlugins(variables)
-		for name, cut in cutDict.iteritems():
-			cutArray[cut.index] = 0
+		output.cd()
+		tree.Write()
+		output.Write()
+		output.Close()
+		print "**** Finished processing ntuple " + ntuple
 
-	output.cd()
-	tree.Write()
-	output.Write()
-	output.Close()
-	print "**** Finished processing ntuple " + ntuple
+	except KeyboardInterrupt:
+		raise KeyboardInterruptError()
 
 def doSplitting(ntuples, index, splitBy, splitInto):
 	numNtuples = len(ntuples)
