@@ -30,7 +30,7 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 						names.append(filename)
 	return names
 
-def loadPlugins(pluginNames):
+def loadPlugins(pluginNames, parameters):
 	global plugins
 	
 	# Get a list of all possible plugin names
@@ -47,6 +47,7 @@ def loadPlugins(pluginNames):
 			fp, pathname, description = imp.find_module(name, __path__)
 			try:
 				plugin = imp.load_module(name, fp, pathname, description)
+				plugin.parameters = parameters
 				pluginDict[name] = plugin
 				plugins.append(plugin)
 			finally:

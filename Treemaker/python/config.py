@@ -21,6 +21,9 @@ class TreemakerConfig:
 			sys.exit(1)
 		self.setup(configFileName)
 
+		# Import variables into plugin namespaces
+		self.configVars = {}
+
 		# Command line options.
 		self.force = False
 		self.linear = False
@@ -66,6 +69,12 @@ class TreemakerConfig:
 		self.splitBy = self.parseOption(configParser, 'splitting', 'split_by', -1, 'int')
 		if self.splitBy != -1 and self.splitInto != -1:
 			print "Error: cannot set both split_into and split_by at the same time."
+		
+		# Parse any config options.
+		try:
+			self.configVars = configParser.items("parameters")
+		except ConfigParser.NoSectionError:
+			pass
 		
 		self.readPlugins(configParser)
 	

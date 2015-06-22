@@ -131,7 +131,7 @@ def runTreemaker(treemakerConfig):
 	force = treemakerConfig.force
 	treename = treemakerConfig.treeName
 	index = treemakerConfig.splitIndex
-	plugins.loadPlugins(treemakerConfig.pluginNames)
+	plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars)
 
 	# Create output name
 	print "*** Running treemaker over " + directory
