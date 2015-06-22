@@ -15,14 +15,15 @@ defaultTreeName = "tree-" + version
 class TreemakerConfig:
 	
 	def __init__(self, configFileName):
+
+		# Import variables into plugin namespaces
+		self.configVars = {}
+
 		self.configFileName = configFileName
 		if not os.path.exists(configFileName):
 			print "Error: tried to read a config file (" + configFileName + ") that did not exist!"
 			sys.exit(1)
 		self.setup(configFileName)
-
-		# Import variables into plugin namespaces
-		self.configVars = {}
 
 		# Command line options.
 		self.force = False
@@ -72,7 +73,8 @@ class TreemakerConfig:
 		
 		# Parse any config options.
 		try:
-			self.configVars = configParser.items("parameters")
+			for paramName, paramValue in configParser.items("parameters"):
+				self.configVars[paramName] = paramValue
 		except ConfigParser.NoSectionError:
 			pass
 		
