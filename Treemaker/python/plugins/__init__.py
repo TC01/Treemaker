@@ -30,7 +30,7 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 						names.append(filename)
 	return names
 
-def loadPlugins(pluginNames, parameters):
+def loadPlugins(pluginNames, parameters={}):
 	global plugins
 	
 	# Get a list of all possible plugin names

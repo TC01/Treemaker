@@ -26,7 +26,7 @@ from Treemaker.Treemaker import plugins
 # splitting commands. :)
 treemakerTimeout = 43200	# (60 * 60 * 12) seconds
 
-def loadPlugins(config):
+def loadPlugins(config, parameters={}):
 	pluginNames = []
 	try:
 		if config == "":
@@ -44,7 +44,7 @@ def loadPlugins(config):
 		sys.exit(1)
 	
 	# Actually load the plugins.
-	plugins.loadPlugins(pluginNames)
+	plugins.loadPlugins(pluginNames, parameters)
 
 def runOverNtuple(ntuple, outputDir, treename, data=False):
 

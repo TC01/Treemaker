@@ -117,7 +117,7 @@ def writeConfigFile(dataset, opts):
 		configParser.set('plugins', plugin, str(priority))
 		
 	# Write a params section, if opts.params is not empty.
-	if len(opts.params) > 0:
+	if opts.params is not None and len(opts.params) > 0:
 		paramDict = {}
 		configParser.add_section('parameters')
 		for param in opts.params:
@@ -125,7 +125,7 @@ def writeConfigFile(dataset, opts):
 				print "Error: malformed parameter " + param, " parameters must be of the form x=y."
 				sys.exit(1)
 			name, _, value = param.partition('=')
-			if name in param.keys():
+			if name in paramDict.keys():
 				print "Error: tried to define parameter " + name + "twice!"
 				sys.exit(1)
 			paramDict[name] = value
