@@ -113,7 +113,7 @@ def doSplitting(ntuples, index, splitBy, splitInto):
 		startJobs = splitInto * index
 		endJobs = splitInto * (index + 1)
 
-	if splitBy > 0 or splitInto > 0:
+	if (splitBy > 0 or splitInto > 0) and index >= 0:
 		if endJobs > len(ntuples):
 			endJobs = len(ntuples)
 		return ntuples[startJobs:endJobs]
@@ -171,6 +171,10 @@ def runTreemaker(treemakerConfig):
 	# Do splitting.
 	ntuples = sorted(ntuples)
 	splitNtuples = doSplitting(ntuples, index, treemakerConfig.splitBy, treemakerConfig.splitInto)
+
+	if len(splitNtuples) == 0:
+		print "Error: no ntuples to run over!"
+		return
 
 	for ntuple in splitNtuples:
 #		workingNtuple = os.path.join(path, ntuple)
