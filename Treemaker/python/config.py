@@ -15,6 +15,10 @@ defaultTreeName = "tree-" + version
 class TreemakerConfig:
 	
 	def __init__(self, configFileName):
+
+		# Import variables into plugin namespaces
+		self.configVars = {}
+
 		self.configFileName = configFileName
 		if not os.path.exists(configFileName):
 			print "Error: tried to read a config file (" + configFileName + ") that did not exist!"
@@ -67,6 +71,13 @@ class TreemakerConfig:
 		if self.splitBy != -1 and self.splitInto != -1:
 			print "Error: cannot set both split_into and split_by at the same time."
 		
+		# Parse any config options.
+		try:
+			for paramName, paramValue in configParser.items("parameters"):
+				self.configVars[paramName] = paramValue
+		except ConfigParser.NoSectionError:
+			pass
+		
 		self.readPlugins(configParser)
 	
 	def readPlugins(self, configParser):
@@ -104,7 +115,23 @@ def writeConfigFile(dataset, opts):
 		priority = i + 1
 		plugin = pluginList[i]
 		configParser.set('plugins', plugin, str(priority))
-
+		
+	# Write a params section, if opts.params is not empty.
+	if opts.params is not None and len(opts.params) > 0:
+		paramDict = {}
+		configParser.add_section('parameters')
+		for param in opts.params:
+			if not '=' in param:
+				print "Error: malformed parameter " + param, " parameters must be of the form x=y."
+				sys.exit(1)
+			name, _, value = param.partition('=')
+			if name in paramDict.keys():
+				print "Error: tried to define parameter " + name + "twice!"
+				sys.exit(1)
+			paramDict[name] = value
+		for name, value in paramDict.iteritems():
+			configParser.set('parameters', name, value)
+		
 	# Write the config parser object to a file.
 	outputName = opts.outputName
 	if outputName == "":

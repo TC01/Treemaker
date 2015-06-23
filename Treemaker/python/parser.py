@@ -35,6 +35,7 @@ def getCondorParser():
 
 def getConfigParser():
 	parser = getParser()
+	parser.add_option("--param", dest="params", action="append", help="Parameter to write to config file and pass to plugins.")
 	parser.add_option("-p", "--plugin-list", dest="pluginList", help="Newline-separated list of plugins to add to generated config file.", default="")
 	parser.add_option("-o", "--output-name", dest="outputName", help="Name of output file, defaults to name of dataset.", default="")
 	return parser
