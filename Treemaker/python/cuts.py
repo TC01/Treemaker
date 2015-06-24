@@ -25,7 +25,7 @@ def writeCutsReport(plugins, name = None):
 	# We can rely on the ordering here to make things be the same order.
 	cutArray = {}
 	cuts = plugins.createCutsPlugins(cutArray)
-	ordered = sorted(cuts, key=cuts.get)
+	ordered = sorted(cuts)
 	for i in xrange(len(ordered)):
 		cutName = ordered[i]
 		cuts[cutName].index = i

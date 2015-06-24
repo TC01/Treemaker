@@ -72,7 +72,7 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 		cutArray = array.array('i', [0] * len(cutDict))
 		tree.Branch("cuts", cutArray, "cuts[" + str(len(cutDict)) + "]/I")
 		# We care about order here so it's consistent.
-		ordered = sorted(cutDict, key=cutDict.get)
+		ordered = sorted(cutDict)
 		for i in xrange(len(ordered)):
 			name = ordered[i]
 			cutDict[name].index = i
