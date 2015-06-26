@@ -90,6 +90,7 @@ def runOverNtuple(ntuple, outputDir, treename, data=False):
 			variables = plugins.resetPlugins(variables)
 			for name, cut in cutDict.iteritems():
 				cutArray[cut.index] = 0
+				cut.passed = 0
 
 		output.cd()
 		tree.Write()
