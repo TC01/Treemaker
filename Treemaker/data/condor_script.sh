@@ -8,10 +8,8 @@ set SPLIT_INDEX=$2
 set ACTUAL_INDEX=$3
 mkdir -p $OUTPUT_DIR
 
-# This should all be replaced with the script to set up our environment.
-# Sadly, it has not been, because it didn't work for some reason
+# Set up a fresh copy of the environment.
 setenv HOME $_CONDOR_SCRATCH_DIR
-setenv SCRAM_ARCH `scramv1 arch`
 scram project $CMSSW_RELEASE
 cd $CMSSW_RELEASE
 eval `scramv1 runtime -csh`

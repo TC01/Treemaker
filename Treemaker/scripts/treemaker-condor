@@ -53,6 +53,13 @@ def main():
 		except KeyError:
 			print "Error: CMSSW_BASE is not defined, you must run cmsenv."
 			sys.exit(1)
+			
+		# Also get the current scram architecture.
+		try:
+			scramArch = os.environ['SCRAM_ARCH']
+		except KeyError:
+			print "Error: scram architecture is not defined. Source cmsset from cvmfs?"
+			sys.exit(1)
 		
 		templateFile = os.path.join(cmssw, template)
 		with open(templateFile, 'rb') as condorFile:
@@ -99,6 +106,7 @@ def main():
 			argsFile.write("#!/bin/tcsh\n")
 			argsFile.write("setenv ARGUMENTS " + arguments + "\n")
 			argsFile.write("setenv CMSSW_RELEASE " + cmsswVersion + "\n")
+			argsFile.write("setenv SCRAM_ARCH " + scramArch + "\n")
 		shutil.copy(os.path.join(cmssw, templateScript), os.path.join(jobPath, scriptFilename))
 		shutil.copy(os.path.join(cmssw, outputScript), os.path.join(jobPath))
 
