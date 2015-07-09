@@ -9,8 +9,11 @@ def setup(variables, isData):
 	return variables
 
 def analyze(event, variables, labels, isData):
-	# load the weight specified in the config file.
-	variables['weight'][0] = float(parameters['weight'])
+	# load the weight specified in the config file, if there is one.
+	try:
+		variables['weight'][0] = float(parameters['weight'])
+	except:
+		pass
 	return variables
 
 def reset(variables):

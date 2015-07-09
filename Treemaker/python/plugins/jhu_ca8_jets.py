@@ -30,8 +30,9 @@ class Jet:
 			deltaR = abs(vector.DeltaR(matching))
 			if deltaR < 0.4:
 				value = i
-		if deltaR > 0.4:
-			value = -1
+				break
+#		if deltaR > 0.4:
+#			value = -1
 		return value
 
 	def setup(self, variables):
@@ -71,16 +72,17 @@ class Jet:
 			unpruned = self.__matchVectors(unprunedVectors, jetVector)
 			
 			tau1 = labels['jhuCa8']['UnprunedCA8tau1'].product()
-			tau2 = labels['jhuCa8']['UnprunedCA8tau1'].product()
-			tau3 = labels['jhuCa8']['UnprunedCA8tau1'].product()
-			if tau1[unpruned] == 0:
-				self.tau21 = 100
-			elif tau1[unpruned] > 0:
-				self.tau21 = tau2[unpruned] / tau1[unpruned]
-			if tau2[unpruned] == 0:
-				self.tau32 = 100
-			elif tau2[unpruned] > 0:
-				self.tau32 = tau3[unpruned] / tau2[unpruned]
+			tau2 = labels['jhuCa8']['UnprunedCA8tau2'].product()
+			tau3 = labels['jhuCa8']['UnprunedCA8tau3'].product()
+			if unpruned >= 0 and unpruned < numJets:
+				if tau1[unpruned] == 0:
+					self.tau21 = 100
+				elif tau1[unpruned] > 0:
+					self.tau21 = tau2[unpruned] / tau1[unpruned]
+				if tau2[unpruned] == 0:
+					self.tau32 = 100
+				elif tau2[unpruned] > 0:
+					self.tau32 = tau3[unpruned] / tau2[unpruned]
 			
 		except:
 			# If this fails, set all variables to defaults.
