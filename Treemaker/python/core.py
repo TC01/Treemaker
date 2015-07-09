@@ -46,11 +46,11 @@ def loadPlugins(config, parameters={}):
 	# Actually load the plugins.
 	plugins.loadPlugins(pluginNames, parameters)
 
-def runOverNtuple(ntuple, outputDir, treename, data=False):
+def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 
 	try:
 		print "**** Processing ntuple: " + ntuple
-		outputName = os.path.join(outputDir, ntuple.rpartition("/")[2])
+		outputName = os.path.join(outputDir, str(offset) + "_" + ntuple.rpartition("/")[2])
 		output = ROOT.TFile(outputName, "RECREATE")
 		tree = ROOT.TTree(treename, treename)
 	
@@ -177,14 +177,16 @@ def runTreemaker(treemakerConfig):
 		print "Error: no ntuples to run over!"
 		return
 
+	offset = 0
 	for ntuple in splitNtuples:
 #		workingNtuple = os.path.join(path, ntuple)
 		workingNtuple = ntuple
 		if linear:
-			runOverNtuple(workingNtuple, outputDir, treename, data)
+			runOverNtuple(workingNtuple, outputDir, treename, offset, data)
 		else:
-			result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, data, ))
+			result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, offset, data, ))
 			results.append(result)
+		offset += 1
 
 	pool.close()
 	pool.join()
