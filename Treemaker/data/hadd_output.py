@@ -21,7 +21,7 @@ def main():
 	outputPath = os.getcwd()	
 	if len(outputFiles) == 1:
 		shutil.move(outputFiles[0], outputPath)
-	if len(outputFiles) == 0:
+	elif len(outputFiles) == 0:
 		print "Error: no ROOT files in output directories, please check the logs/"
 		sys.exit(1)
 	else:
