@@ -1,38 +1,54 @@
+#!/usr/bin/env python
+
 # Pruner for trees. Takes a tree and removes events not passing certain cuts.
 
-# Code written by Marc. Memo to add some error checking to it someday. --Ben
+# Code originally written by Marc, modified by Ben to have a better CLI
+# more in line with what the other treemaker commands do.
+
+# Code written by Marc, modified by Ben to be more forgiving and have better
+# command line options (with help text and defaults).
 
 import os
 import ROOT
-from ROOT import *
 import sys
 
 from optparse import OptionParser
 parser = OptionParser()
-parser.add_option('--n', metavar='N', type='string', action='store',
-                  dest='nm',
-                  help='')
-parser.add_option('--o', metavar='O', type='string', action='store',
-                  dest='out',
-                  help='')
-parser.add_option('--t', metavar='T', type='string', action='store',
-                  dest='tree',
-                  help='')
-parser.add_option('--c', metavar='C', type='string', action='store',
-                  dest='CUTS',
-                  help='')
+parser.add_option('-n', '--name', dest='name', help="Input filename.")
+parser.add_option('-o', '--out', dest='out', default="", help='Output name, defaults to input name with _pruned appended.')
+parser.add_option('-t', '--tree', dest='tree', default='tree', help='Tree name, defaults to tree.')
+parser.add_option('-c', '--cuts', dest='cuts', default="", help='The cut to apply to the selection')
 (options, args) = parser.parse_args()
 
-f = TFile(options.nm)
+inputName = options.name
+if not '.root' in options.name:
+	inputName += '.root'
+
+# Some error checking, as promised.
+try:
+	f = ROOT.TFile(inputName)
+except:
+	print "Error: invalid root file " + inputName
+	sys.exit(1)
+
 t = f.Get(options.tree)
 
-newf = TFile("holding.root", "recreate" )
+newf = ROOT.TFile("holding.root", "recreate" )
 newf.cd()
 
-T = t.CopyTree(options.CUTS)
-T.SetName(options.tree)
+try:
+	T = t.CopyTree(options.cuts)
+	T.SetName(options.tree)
+except:
+	print "Error: unable to copy tree, please check the tree name '" + options.tree + "', or the cuts string '" + options.cuts + "'"
+	sys.exit(1)
 
-newnewf = TFile(options.out+".root", "recreate")
+# Default output name.
+out = options.out
+if out == '':
+	out = inputName.split('.')[0] + '_pruned.root'
+
+newnewf = ROOT.TFile(out, "recreate")
 newnewf.cd()
 
 TT = T.CopyTree('')
@@ -40,3 +56,6 @@ TT.SetName(options.tree)
 
 newnewf.Write()
 newnewf.Save()
+
+# Clean up the holding.root file.
+os.remove("holding.root")
