@@ -70,7 +70,7 @@ it as follows into a release of the [CMSSW framework](https://twiki.cern.ch/twik
 There is currently not support for installing Treemaker outside of the
 CMSSW framework. In theory, this is entirely possible, but (for example)
 a setup.py has not yet been written that could convert the CMSSW module
-layout into 
+layout into a standard Python distutils module.
 
 This documentation assumes you have already set up a release of the CMSSW framework, 
 and ran the ```cmsenv``` command.
