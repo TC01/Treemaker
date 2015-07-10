@@ -1,13 +1,21 @@
-Treemaker v0.2
+Treemaker v1.0
 --------------
 
-This Treemaker (named generically, because A. it is fairly generic and
-extremely extensible, and B. because I couldn't come up with a good name)
-is designed to take EDM Ntuples containing events used
-in analyses as part of CERN's [CMS collaboration](http://cms.cern.ch/) and 
-turn them into [ROOT](http://root.cern.ch/) ttrees.
+Treemaker is a generic, extensible piece of Python software for turning
+[EDM Ntuples](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideEDMNtuples)
+into [ROOT](http://root.cern.ch/) ttrees, written by Ben Rosser as an
+undergraduate member of the [CMS collaboration](http://cms.cern.ch/) at CERN.
 
-There are many reasons why you might want to do this:
+The name is generic because I could not come up with a better one in a 
+short amount of time, but also because it's appropriate. :)
+
+Currently, all documentation is available in this file. Some might be moved
+into a wiki on this git repository or to a github pages site as it grows
+in size.
+
+# Introduction:
+
+There are many reasons why you might want to do turn your trees into ntuples.
 
 * TTrees will generally be much smaller than ntuples, so they can be processed
 on machines other than large clusters, like your personal laptop.
@@ -30,9 +38,7 @@ attempted to write a generic Ntuple -> TTree converter. And it worked! It
 programmatically derived the contents of an Ntuple and managed to figure out
 the right way to write them to a TTree... except, unfortunately, for those
 objects in an Ntuple that are part of the CMSSW framework and therefore could
-not be written directly to a TTree.
-
-So the project was put on hold.
+not be written directly to a TTree. So the project was put on hold.
 
 After a year and a half of other work, I was asked to write another treemaker,
 but we discussed the possibilities of implementing something more generic like
@@ -53,161 +59,83 @@ a 24-core machine) and setting up the event loop.
 
 You are encouraged to submit any plugins you write upstream to this repository.
 
-The Future:
------------
+# Installation:
 
-See the Issues tracker for more info.
-
-There are some things that could use some work, definitely. The treemaker
-could, for example, put the cut report that it generates inside the ROOT
-file rather than as a plaintext file.
-
-More exposed control for plugins from the configuration file might be nice;
-for example, allowing them to expose knobs rather than just "yes, run this"
-or "no, do not run this".
-
-I would also like to do some optimization of the way Handles are loaded
-(to make it lazy instead of eager, thus causing significant speed
-improvements), but we'll see if I ever actually get around to that.
-
-Installation:
--------------
+We recommend you install the last stable release of Treemaker, tagged
+"stable".
 
 Treemaker is currently packaged as a CMSSW module; that means you can install
-it as follows into a CMSSW release.
+it as follows into a release of the [CMSSW framework](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCMSSWFramework).
+
+There is currently not support for installing Treemaker outside of the
+CMSSW framework. In theory, this is entirely possible, but (for example)
+a setup.py has not yet been written that could convert the CMSSW module
+layout into 
+
+This documentation assumes you have already set up a release of the CMSSW framework, 
+and ran the ```cmsenv``` command.
+For instructions on how to do this on cmslpc, see 
+[here](http://uscms.org/uscms_at_work/physics/computing/setup/setup_software.shtml).
+
+Once you have done that, run the following commands below.
 
 ```
-cd CMSSW_5_3_*\src
-git clone http://github.com/TC01/Treemaker/ $VERSION
+cd ${CMSSW_BASE}/src 
+git clone http://github.com/TC01/Treemaker/
+cd Treemaker && git checkout stable && cd ..
 scram build
 ```
 
-We recommend you clone the last stable version. Version names are of the form
-"vX.Y", where X is the major release and Y is the minor release. The current
-version is listed on top of the README.
+# Documentation:
 
-This will then install the ```treemaker``` command as a Python script
-that you can run from any directory.
+Between Treemaker v0.2/v0.3 and v1.0, a lot of stuff changed and the amount
+of documentation grew significantly. You can find the documentation in the
+[wiki](https://github.com/TC01/Treemaker/wiki) on this repository.
 
-Run ```treemaker -h``` to get a sense of command line options.
+Please consult that if you have any questions.
 
-Running:
---------
+# Usage:
 
-As we have discussed, the Treemaker is built around the concept of
-plugins. Because we hope to hold a large number of plugins in this
-repository, it would be bad if running the treemaker.
+The general Treemaker workflow is something like this:
 
-To solve this problem, as of Treemaker v0.2, configuration files
-are now required. Config files are currently simple newline-delineated
-files containing lists of plugins (there is an example config file
-in this repository, under ```data/```. Only plugins listed in a config
-file will be loaded and executed.
+1. Write plugins and put them in ```Treemaker/python/plugins```. The
+documentation has a thorough discussion of how to do this, along with the
+examples in the repository.
 
-You must specify this file with the ```treemaker -c FILENAME``` option;
-if you do not specify a config file, Treemaker will refuse to run.
+2. Create a list of plugins, in the order you want them to run, and save it
+to a file ```plugins.list```. (The name doesn't really matter).
 
-Writing Plugins:
-----------------
-
-To write a plugin, create a new Python file and land it in: plugins/.
-The file needs to implement five methods, here is an example:
+3. Run the following command over the dataset you wish to convert.
+If it is data, and not Monte Carlo, add the ```-d``` flag. This will
+automatically generate a config file.
 
 ```
-import array
-
-from Treemaker.Treemaker import cuts
-
-def setup(variables, isData):
-	variables['varname'] = array.array('f', [-1.0])
-	return variables
-
-def analyze(event, variables, labels, isData):
-	handle = labels['module']['label']
-	product = handle.product()
-	# Product is likely a vector, so some more processing should happen here.
-	variables['varname'][0] = product[0]
-	return variables
-
-def reset(variables):
-	variables['varname'][0] = -1.0
-	return variables
-
-def createCuts(cutDict):
-	cutDict['example'] = cuts.Cut('example', 'This is some example cut description').
-
-def makeCuts(event, variables, cutDict, labels, isData):
-	# This will always pass the cut, obviously we'd really do something
-	# more interesting with the variables and labels dictionaries.
-	cutDict['example'].passed = 1
-
+treemaker-config -p plugins.list /path/to/dataset/
 ```
 
-Here, ```variables```, ```cutDict```,  and ```labels``` are all dictionaries.
+4. Run the following command:
 
-The ```labels``` dictionary is produced by running ```edmDumpEventContent```
-over the ntuples that are being converted. A 2D dictionary is then created;
-a dictionary where the module names (ex: "diffmoca8pp") are keys for other
-dictionaries, where the actual label names (ex: "PrunedCA8Jets") are keys
-for Handle objects.
+```
+treemaker -f _name_of_config_file_
+```
 
-On every event, code is ran that automatically calls event.getByLabel() for
-all labels in an ntuple, so you don't have to do this yourself. You can look
-up the handles you need to do treemaking directly as seen above.
+5. Enjoy your ttrees!
 
-```variables``` is a dictionary mapping variable names to array objects. The
-```setup()``` function is called in all plugins to create this dictionary;
-TTree branches are then set up for each variable in that dictionary.
+It can be slightly more complicated than that if you want to use job splitting
+or condor or anything slightly fancier. Consult the documentation for more.
 
-Then, when the ```analyze()``` step runs, you can look up any handles you need
-by their module and label names, do whatever processing you want, and then
-fill the dictionary of variables and return a copy of it. The treemaker will
-automatically call ```tree.Fill()``` after finishing calling all of these
-methods.
+# Credits:
 
-```reset()``` is called after filling the ttree, to restore all arrays to their
-default value.
-
-The example code above would successfully add a single variable to a ttree, but
-as you might expect, you can do much more complicated things in plugins. Take
-a look at diffmo_jets.py for an example of a more complicated implementation
-(that defines a Jet class and determines how many of them to keep).
-
-The ```cuts``` functionality was added in version 0.2. Cuts are essentially
-special variables that are stored in the resulting ttree as a single integer
-array. This allows you to implement cuts you'll need later in your analysis
-(for instance, such as triggers). When you then want to run an analysis,
-you can quickly check if ```cuts[i]``` is 0 or 1 (or some other value) to
-determine if the event passed whatever analysis was mapped to cut ```i```.
-
-Because cuts are named, rather than numbered, a report file 
-(```*_cuts_report.txt```) is generated after Treemaker finishes running with
-a mapping between indices in the ```cuts``` array in the tree and the names
-you will have given them in your plugins.
-
-For more help, look at other plugins that are shipped in this repository or
-contact me directly for more information.
-
-Testing Plugins:
-----------------
-
-When debugging your code, please be sure to use the ```-l``` option. This
-forces Treemaker to *not* use Python multiprocessing, which makes things
-substantially slower. For unfortunate reasons, errors in your plugins
-won't be printed to standard output if you run with multiprocessing; so
-if you want to verify your ntuples are actually being processed, please
-use the ```-l``` option.
-
-Specifically; you will see the "started processing" message but never
-a "finished processing" message. If you do not see the "finished" message,
-that means an error is in your code somewhere, so please run with ```-l```
-to debug.
-
-There is currently a ticket open about these problems.
-
-Credits:
---------
+## Developers
 
 * Ben Rosser <brosser3@jhu.edu>
+
+## Contributors: Code
+
 * Marc Osherson
+
+## Contributors: Suggestions
+
+* Dave Fehling
+* Nick Eminizer
 * Petar Maksimovic
