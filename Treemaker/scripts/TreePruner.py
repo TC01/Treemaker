@@ -14,7 +14,7 @@ import sys
 
 from optparse import OptionParser
 parser = OptionParser()
-parser.add_option('-n', '--name', dest='name', help="Input filename.")
+parser.add_option('-n', '--name', dest='name', default="", help="Input filename.")
 parser.add_option('-o', '--out', dest='out', default="", help='Output name, defaults to input name with _pruned appended.')
 parser.add_option('-t', '--tree', dest='tree', default='tree', help='Tree name, defaults to tree.')
 parser.add_option('-c', '--cuts', dest='cuts', default="", help='The cut to apply to the selection')
@@ -33,7 +33,7 @@ except:
 
 t = f.Get(options.tree)
 
-newf = ROOT.TFile("holding.root", "recreate" )
+newf = ROOT.TFile("holding_" + options.name, "recreate" )
 newf.cd()
 
 try:
@@ -58,4 +58,4 @@ newnewf.Write()
 newnewf.Save()
 
 # Clean up the holding.root file.
-os.remove("holding.root")
+os.remove("holding_" + options.name)
