@@ -26,6 +26,10 @@ from Treemaker.Treemaker import plugins
 # splitting commands. :)
 treemakerTimeout = 43200	# (60 * 60 * 12) seconds
 
+# Courtesy of StackOverflow.
+# https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool
+class KeyboardInterruptError(Exception): pass
+
 def loadPlugins(config, parameters={}):
 	pluginNames = []
 	try:
