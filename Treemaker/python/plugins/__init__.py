@@ -98,3 +98,15 @@ def resetPlugins(variables):
 	for plugin in plugins:
 		variables = plugin.reset(variables)
 	return variables
+
+def dropPlugins(event, variables, cuts, labels, isData):
+	"""	If any plugin's drop() returns True, we decide to drop the event."""
+	shouldDrop = False
+	for plugin in plugins:
+		# Not all plugins will have a drop method.
+		try:
+			if plugin.drop(event, variables, cuts, labels, isData):
+				shouldDrop = True
+		except AttributeError:
+			continue
+	return shouldDrop

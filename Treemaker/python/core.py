@@ -86,7 +86,13 @@ def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 			for name, cut in cutDict.iteritems():
 				cutArray[cut.index] = cut.passed
 
-			tree.Fill()
+			# Check if any plugin says that we should drop the event.
+			# If the event is being dropped, simply don't call Fill()
+			shouldDrop = plugins.dropPlugins(event, variables, cutDict, labelDict, data)
+			if not shouldDrop:
+				tree.Fill()
+
+			# Reset our variables and cuts dictionaries.
 			variables = plugins.resetPlugins(variables)
 			for name, cut in cutDict.iteritems():
 				cutArray[cut.index] = 0
