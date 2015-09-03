@@ -48,6 +48,14 @@ def loadPlugins(pluginNames, parameters={}):
 			fp, pathname, description = imp.find_module(name, __path__)
 			try:
 				plugin = imp.load_module(name, fp, pathname, description)
+				
+				# Complain (once!) about deprecated function.
+				try:
+					# If this doesn't trip an error, print a message.
+					spec = inspect.getargspec(plugin.makeCuts)
+					print "Error: deprecated makeCuts method is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
+				except AttributeError:
+					pass
 				plugin.parameters = parameters
 				pluginDict[name] = plugin
 				plugins.append(plugin)
