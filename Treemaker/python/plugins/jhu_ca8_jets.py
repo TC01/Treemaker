@@ -153,3 +153,9 @@ def reset(variables):
 		variables = jet.reset(variables)
 	variables['numjets'][0] = 0.0
 	return variables
+
+def drop(event, variables, cutArray, labels, isData):
+	# Only keep events with numjets >= numJets (3).
+	if variables['numjets'][0] < numJets:
+		return True
+	return False
