@@ -132,7 +132,7 @@ def setup(variables, isData):
 def createCuts(cutArray):
 	return cutArray
 
-def analyze(event, variables, labels, isData):
+def analyze(event, variables, labels, isData, cutArray):
 	# Perhaps we should write the number of jets too.
 	for jet in jets:
 		variables = jet.analyze(variables, labels)
@@ -143,10 +143,7 @@ def analyze(event, variables, labels, isData):
 	jetVectors = labels['jhuCa8pp'][jetCollection].product()
 	variables['numjets'][0] = len(jetVectors)
 
-	return variables
-
-def makeCuts(event, variables, cutArray, labels, isData):
-	return cutArray
+	return variables, cutArray
 
 def reset(variables):
 	for jet in jets:

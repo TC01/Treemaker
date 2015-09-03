@@ -105,7 +105,7 @@ def analyzePlugins(event, variables, cuts, labels, isData):
 			variables = plugin.analyze(event, variables, labels, isData)
 			cuts = plugin.makeCuts(event, variables, cuts, labels, isData)
 		else:
-			variables, cuts = plugin.analyze(events, variables, labels, isData, cuts)
+			variables, cuts = plugin.analyze(event, variables, labels, isData, cuts)
 		# If any plugin's drop method returns true, break. But not all
 		# will have a drop method.
 		try:
