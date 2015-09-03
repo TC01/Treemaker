@@ -84,15 +84,13 @@ def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 		# Now, run over all events.
 		for event in Events(ntuple):
 			labelDict = labels.fillLabels(event, labelDict)
-			variables = plugins.analyzePlugins(event, variables, labelDict, data)
-	
-			cutDict = plugins.makeCutsPlugins(event, variables, cutDict, labelDict, data)
+
+			variables, cutDict, shouldDrop = plugins.analyzePlugins(event, variables, cutDict, labelDict, data)
 			for name, cut in cutDict.iteritems():
 				cutArray[cut.index] = cut.passed
 
 			# Check if any plugin says that we should drop the event.
 			# If the event is being dropped, simply don't call Fill()
-			shouldDrop = plugins.dropPlugins(event, variables, cutDict, labelDict, data)
 			if not shouldDrop:
 				tree.Fill()
 

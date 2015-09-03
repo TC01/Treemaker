@@ -1,4 +1,5 @@
 import imp
+import inspect
 import os
 import sys
 
@@ -84,30 +85,33 @@ def setupPlugins(variables, isData):
 		variables = plugin.setup(variables, isData)
 	return variables
 
-def analyzePlugins(event, variables, labels, isData):
-	for plugin in plugins:
-		variables = plugin.analyze(event, variables, labels, isData)
-	return variables
-
-def makeCutsPlugins(event, variables, cuts, labels, isData):
-	for plugin in plugins:
-		cuts = plugin.makeCuts(event, variables, cuts, labels, isData)
-	return cuts	
-
-def resetPlugins(variables):
-	for plugin in plugins:
-		variables = plugin.reset(variables)
-	return variables
-
-def dropPlugins(event, variables, cuts, labels, isData):
-	"""	If any plugin's drop() returns True, we decide to drop the event."""
+def analyzePlugins(event, variables, cuts, labels, isData):
+	"""	Run the analyze and cut analyze routines. Also check if we should drop.
+		For 'old' (up to Treemaker v1.0) formatted plugins, analyze and makeCuts
+		are two separate calls.
+		For 'new' (Treemaker v1.1 and onwards) plugins, this is one call."""
 	shouldDrop = False
 	for plugin in plugins:
-		# Not all plugins will have a drop method.
+		numAnalyzeArgs = len(inspect.getargspec(plugin.analyze).args)
+		if numAnalyzeArgs == 4:
+			variables = plugin.analyze(event, variables, labels, isData)
+			cuts = plugin.makeCuts(event, variables, cuts, labels, isData)
+		else:
+			variables, cuts = plugin.analyze(events, variables, labels, isData, cuts)
+		# If any plugin's drop method returns true, break. But not all
+		# will have a drop method.
 		try:
 			if plugin.drop(event, variables, cuts, labels, isData):
 				shouldDrop = True
 				break
 		except AttributeError:
 			continue
-	return shouldDrop
+
+	# Return a three-tuple of variables + cuts info and the shouldDrop flag.
+	return variables, cuts, shouldDrop
+
+def resetPlugins(variables):
+	for plugin in plugins:
+		variables = plugin.reset(variables)
+	return variables
+
