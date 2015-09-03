@@ -107,6 +107,7 @@ def dropPlugins(event, variables, cuts, labels, isData):
 		try:
 			if plugin.drop(event, variables, cuts, labels, isData):
 				shouldDrop = True
+				break
 		except AttributeError:
 			continue
 	return shouldDrop
