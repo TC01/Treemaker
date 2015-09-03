@@ -166,7 +166,8 @@ def runTreemaker(treemakerConfig):
 			print "Or run treemaker -f."
 			return
 
-	pool = multiprocessing.Pool()
+	if not linear:
+		pool = multiprocessing.Pool()
 	results = []
 	
 	# Accumulate a list of files. Subdirectories are okay.
@@ -196,10 +197,11 @@ def runTreemaker(treemakerConfig):
 			results.append(result)
 		offset += 1
 
-	pool.close()
-	pool.join()
-	for result in results:
-		result.get(timeout=treemakerTimeout)
+	if not linear:
+		pool.close()
+		pool.join()
+		for result in results:
+			result.get(timeout=treemakerTimeout)
 
 	# For now use os.system to run hadd, we should figure out a better way.
 	# But this works, so...
