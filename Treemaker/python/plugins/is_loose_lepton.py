@@ -13,10 +13,7 @@ def createCuts(cutArray):
 	cutArray["isLoose"] = cuts.Cut("Is Loose Lepton", description)
 	return cutArray
 
-def analyze(event, variables, labels, isData):
-	return variables
-
-def makeCuts(event, variables, cutArray, labels, isData):
+def analyze(event, variables, labels, isData, cutArray):
 
 	muonLoose = labels['jhuMuonPFlow']['muonisloose'].product()
 	electronLoose = labels['jhuElePFlow']['electronisloose'].product()
@@ -34,7 +31,8 @@ def makeCuts(event, variables, cutArray, labels, isData):
 	if isLoose:
 		cutArray["isLoose"].passed = 1
 
-	return cutArray
+
+	return variables, cutArray
 	
 def reset(variables):
 	return variables

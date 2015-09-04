@@ -9,13 +9,13 @@ def setup(variables, isData):
 	variables['metpt'] = array.array('f', [-1.0])
 	return variables
 
-def analyze(event, variables, labels, isData):
+def analyze(event, variables, labels, isData, cutArray):
 	ptHandle = labels['jhuGen']['metpt']
 	phiHandle = labels['jhuGen']['metphi']
 	if ptHandle.isValid() and phiHandle.isValid():
 		variables['metpt'][0] = ptHandle.product()[0]
 		variables['metphi'][0] = phiHandle.product()[0]
-	return variables
+	return variables, cutArray
 
 def reset(variables):
 	variables['metpt'][0] = -1.0
@@ -25,5 +25,3 @@ def reset(variables):
 def createCuts(cutArray):
 	return cutArray
 
-def makeCuts(event, variables, cutArray, labels, isData):
-	return cutArray

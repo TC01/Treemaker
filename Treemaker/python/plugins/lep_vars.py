@@ -31,7 +31,7 @@ def fillLeptons(variables, vector, iso, charge):
 	variables['lepiso'][0] = iso[0]
 	return variables
 
-def analyze(event, variables, labels, isData):
+def analyze(event, variables, labels, isData, cutArray):
 	electrons = labels['jhuElePFlow']['electron'].product()
 	muons = labels['jhuMuonPFlow']['muon'].product()
 	
@@ -43,7 +43,7 @@ def analyze(event, variables, labels, isData):
 
 	# Do nothing if there are no electrons *or* muons.
 	if len(electrons) == 0 and len(muons) == 0:
-		return variables
+		return variables, cutArray
 	
 	# Sort into three different categories: only the muons and electrons one
 	# is hard.
@@ -63,7 +63,14 @@ def analyze(event, variables, labels, isData):
 			variables = fillLeptons(variables, muons, muonISO, muonCharge)
 			variables['isMuon'][0] = 1.0
 		
-	return variables
+	# For legacy purposes.
+	if variables['isElectron'][0] > 0:
+		cutArray['isElectron'].passed = 1
+	if variables['isMuon'][0] > 0:
+		cutArray['isMuon'].passed = 1
+
+
+	return variables, cutArray
 
 def reset(variables):
 	variables['leppt'][0] = -1.0
@@ -83,17 +90,6 @@ def createCuts(cutArray):
 	cutArray["isHadronic"] = cuts.Cut("Hadronic", "Is the event purely hadronic?")
 	cutArray["isMuon"] = cuts.Cut("Muon", "Is the event a muon event?")
 	cutArray["isElectron"] = cuts.Cut("Electron", "Is the event an electron event?")
-	return cutArray
-
-def makeCuts(event, variables, cutArray, labels, isData):
-
-	# For legacy purposes.
-
-	if variables['isElectron'][0] > 0:
-		cutArray['isElectron'].passed = 1
-	if variables['isMuon'][0] > 0:
-		cutArray['isMuon'].passed = 1
-
 	return cutArray
 
 def drop(event, variables, cutArray, labels, isData):
