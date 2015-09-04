@@ -30,29 +30,13 @@ treemakerTimeout = 43200	# (60 * 60 * 12) seconds
 # https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool
 class KeyboardInterruptError(Exception): pass
 
-def loadPlugins(config, parameters={}):
-	pluginNames = []
+def runOverNtuple(treemakerConfig, ntuple, outputDir, treename, offset, data=False):
 	try:
-		if config == "":
-			raise RuntimeError
-		with open(config) as configFile:
-			for line in configFile:
-				line = line.rstrip('\n')
-				if not line.lstrip().rstrip() == "" and not line[0] == "#":
-					pluginNames.append(line)
-	except RuntimeError:
-		print "ERROR: attempted to run Treemaker without specifying plugins!"
-		print "The safest thing to do is fail."
-		print "Please rerun Treemaker with the -c [config name] option, where [config name]"
-		print "is a file containing newline-separated list of plugin names."
-		sys.exit(1)
-	
-	# Actually load the plugins.
-	plugins.loadPlugins(pluginNames, parameters)
-
-def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
-
-	try:
+		
+		# Load plugins, silently, turn them into a class.
+		pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, True)
+		runner = plugins.PluginRunner(pluginArray)
+		
 		print "**** Processing ntuple: " + ntuple
 		outputName = os.path.join(outputDir, str(offset) + "_" + ntuple.rpartition("/")[2])
 		output = ROOT.TFile(outputName, "RECREATE")
@@ -64,7 +48,7 @@ def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 		# Set up branches for all variables declared by loaded plugins.
 		# Do this setup in sorted alphabetical order by variable name.
 		variables = {}
-		variables = plugins.setupPlugins(variables, data)
+		variables = runner.setupPlugins(variables, data)
 		sortedVarNames = sorted(variables)
 		for varName in sortedVarNames:
 			varArray = variables[varName]
@@ -72,7 +56,7 @@ def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 
 		# Create the cuts array.
 		cutDict = {}
-		cutDict = plugins.createCutsPlugins(cutDict)
+		cutDict = runner.createCutsPlugins(cutDict)
 		cutArray = array.array('i', [0] * len(cutDict))
 		tree.Branch("cuts", cutArray, "cuts[" + str(len(cutDict)) + "]/I")
 		# We care about order here so it's consistent.
@@ -85,7 +69,7 @@ def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 		for event in Events(ntuple):
 			labelDict = labels.fillLabels(event, labelDict)
 
-			variables, cutDict, shouldDrop = plugins.analyzePlugins(event, variables, cutDict, labelDict, data)
+			variables, cutDict, shouldDrop = runner.analyzePlugins(event, variables, cutDict, labelDict, data)
 			for name, cut in cutDict.iteritems():
 				cutArray[cut.index] = cut.passed
 
@@ -95,7 +79,7 @@ def runOverNtuple(ntuple, outputDir, treename, offset, data=False):
 				tree.Fill()
 
 			# Reset our variables and cuts dictionaries.
-			variables = plugins.resetPlugins(variables)
+			variables = runner.resetPlugins(variables)
 			for name, cut in cutDict.iteritems():
 				cutArray[cut.index] = 0
 				cut.passed = 0
@@ -140,6 +124,8 @@ def runTreemaker(treemakerConfig):
 	force = treemakerConfig.force
 	treename = treemakerConfig.treeName
 	index = treemakerConfig.splitIndex
+	
+	# Load the plugins once for checking before we start.
 	plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars)
 
 	# Create output name
@@ -191,9 +177,9 @@ def runTreemaker(treemakerConfig):
 #		workingNtuple = os.path.join(path, ntuple)
 		workingNtuple = ntuple
 		if linear:
-			runOverNtuple(workingNtuple, outputDir, treename, offset, data)
+			runOverNtuple(treemakerConfig, workingNtuple, outputDir, treename, offset, data)
 		else:
-			result = pool.apply_async(runOverNtuple, (workingNtuple, outputDir, treename, offset, data, ))
+			result = pool.apply_async(runOverNtuple, (treemakerConfig, workingNtuple, outputDir, treename, offset, data, ))
 			results.append(result)
 		offset += 1
 

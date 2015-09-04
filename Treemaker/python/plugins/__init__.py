@@ -31,34 +31,44 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 						names.append(filename)
 	return names
 
-def loadPlugins(pluginNames, parameters={}):
+def loadPlugins(pluginNames, parameters={}, silent=False):
 	global plugins
 	
 	# Get a list of all possible plugin names
 	names = getPossiblePluginNames(pluginNames.keys())
 	pluginDict = {}
+	if names == [] and not silent:
+		print "ERROR: attempted to run Treemaker without specifying plugins!"
+		print "The safest thing to do is fail."
+		print "Please rerun Treemaker with the -c [config name] option, where [config name]"
+		print "is a file containing newline-separated list of plugin names."
+		sys.exit(1)
 
 	# Now, use imp to load all the plugins we specified
 	for name in names:
 		try:
 			test = sys.modules[name]
-			print "*** Error: a module with the name " + name + " was already loaded!"
-			sys.exit(1)
+			if not silent:
+				print "*** Error: a module with the name " + name + " was already loaded!"
+				sys.exit(1)
 		except KeyError:
 			fp, pathname, description = imp.find_module(name, __path__)
 			try:
 				plugin = imp.load_module(name, fp, pathname, description)
 				
 				# Complain (once!) about deprecated function.
-				try:
-					# If this doesn't trip an error, print a message.
-					spec = inspect.getargspec(plugin.makeCuts)
-					print "Error: deprecated makeCuts method is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
-				except AttributeError:
-					pass
+				if not silent:
+					try:
+						# If this doesn't trip an error, print a message.
+						spec = inspect.getargspec(plugin.makeCuts)
+						print "Error: deprecated makeCuts method is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
+					except AttributeError:
+						pass
+
 				plugin.parameters = parameters
 				pluginDict[name] = plugin
 				plugins.append(plugin)
+
 			finally:
 				if not fp is None:
 					fp.close()
@@ -67,59 +77,74 @@ def loadPlugins(pluginNames, parameters={}):
 	# Order is priority as specified in config file.
 	pluginOrder = sorted(pluginDict, key = lambda name: pluginNames[name])
 	for i in xrange(len(pluginOrder)):
-		print "*** Loading " + pluginOrder[i]
+		if not silent:
+			print "*** Loading " + pluginOrder[i]
 		plugins[i] = pluginDict[pluginOrder[i]]
 
 	# If we choose to implement plugin dependencies, that should now be done.
 
 	# Deal with unloaded plugins.
 	# This should be a failure conditional.
-	if len(pluginNames) != len(plugins):
+	if len(pluginNames) != len(plugins) and not silent:
 		for name in pluginNames.keys():
 			if not name in pluginDict.keys():
 				print "ERROR: unable to load plugin " + name
 		sys.exit(1)
 
-	# Then return plugins, just in case.
+	# Then return plugins.
 	return plugins
 
-def createCutsPlugins(cutArray):
-	for plugin in plugins:
-		cutArray = plugin.createCuts(cutArray)
-	return cutArray
+class PluginRunner:
+	
+	def __init__(self, plugins):
+		# To preserve order and touch the fewest places, I will be lazy.
+		# We really should have a Plugin class.
+		self.plugins = plugins
+		self.isDeprecated = []
+		for plugin in self.plugins:
+			numAnalyzeArgs = len(inspect.getargspec(plugin.analyze).args)
+			if numAnalyzeArgs == 4:
+				self.isDeprecated.append(True)
+			else:
+				self.isDeprecated.append(False)
 
-def setupPlugins(variables, isData):
-	for plugin in plugins:
-		variables = plugin.setup(variables, isData)
-	return variables
+	def createCutsPlugins(self, cutArray):
+		for plugin in self.plugins:
+			cutArray = plugin.createCuts(cutArray)
+		return cutArray
 
-def analyzePlugins(event, variables, cuts, labels, isData):
-	"""	Run the analyze and cut analyze routines. Also check if we should drop.
-		For 'old' (up to Treemaker v1.0) formatted plugins, analyze and makeCuts
-		are two separate calls.
-		For 'new' (Treemaker v1.1 and onwards) plugins, this is one call."""
-	shouldDrop = False
-	for plugin in plugins:
-		numAnalyzeArgs = len(inspect.getargspec(plugin.analyze).args)
-		if numAnalyzeArgs == 4:
-			variables = plugin.analyze(event, variables, labels, isData)
-			cuts = plugin.makeCuts(event, variables, cuts, labels, isData)
-		else:
-			variables, cuts = plugin.analyze(event, variables, labels, isData, cuts)
-		# If any plugin's drop method returns true, break. But not all
-		# will have a drop method.
-		try:
-			if plugin.drop(event, variables, cuts, labels, isData):
-				shouldDrop = True
-				break
-		except AttributeError:
-			continue
+	def setupPlugins(self, variables, isData):
+		for plugin in self.plugins:
+			variables = plugin.setup(variables, isData)
+		return variables
 
-	# Return a three-tuple of variables + cuts info and the shouldDrop flag.
-	return variables, cuts, shouldDrop
+	def analyzePlugins(event, variables, cuts, labels, isData):
+		"""	Run the analyze and cut analyze routines. Also check if we should drop.
+			For 'old' (up to Treemaker v1.0) formatted plugins, analyze and makeCuts
+			are two separate calls.
+			For 'new' (Treemaker v1.1 and onwards) plugins, this is one call."""
+		shouldDrop = False
+		count = 0
+		for plugin in self.plugins:
+			# If any plugin's drop method returns true, break. But not all
+			# will have a drop method.
+			if self.isDeprecated[count]:
+				variables = plugin.analyze(event, variables, labels, isData)
+				cuts = plugin.makeCuts(event, variables, cuts, labels, isData)				
+			else:
+				variables, cuts = plugin.analyze(event, variables, labels, isData, cuts)				
+			try:
+				if plugin.drop(event, variables, cuts, labels, isData):
+					shouldDrop = True
+					break
+			except AttributeError:
+				continue
 
-def resetPlugins(variables):
-	for plugin in plugins:
-		variables = plugin.reset(variables)
-	return variables
+		# Return a three-tuple of variables + cuts info and the shouldDrop flag.
+		return variables, cuts, shouldDrop
+
+	def resetPlugins(variables):
+		for plugin in self.plugins:
+			variables = plugin.reset(variables)
+		return variables
 
