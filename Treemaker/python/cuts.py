@@ -18,13 +18,13 @@ class Cut:
 	def __repr__(self):
 		return self.__str()
 
-def writeCutsReport(plugins, name = None):
+def writeCutsReport(runner, name = None):
 	"""	Helper method to write out a 'cut report' of the indexes and names of
 		the cuts. If no name is given, writes to standard output."""
 
 	# We can rely on the ordering here to make things be the same order.
 	cutArray = {}
-	cuts = plugins.createCutsPlugins(cutArray)
+	cuts = runner.createCutsPlugins(cutArray)
 	ordered = sorted(cuts)
 	for i in xrange(len(ordered)):
 		cutName = ordered[i]

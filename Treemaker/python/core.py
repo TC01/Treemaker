@@ -126,7 +126,8 @@ def runTreemaker(treemakerConfig):
 	index = treemakerConfig.splitIndex
 	
 	# Load the plugins once for checking before we start.
-	plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars)
+	pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars)
+	runner = plugins.PluginRunner(pluginArray)
 
 	# Create output name
 	print "*** Running treemaker over " + directory
@@ -197,6 +198,6 @@ def runTreemaker(treemakerConfig):
 	os.system(haddCommand + name + " " + outputDir + "/*")
 
 	# Generate output cuts report.
-	cuts.writeCutsReport(plugins, name)
+	cuts.writeCutsReport(runner, name)
 
 	shutil.rmtree(outputDir)

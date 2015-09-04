@@ -118,7 +118,7 @@ class PluginRunner:
 			variables = plugin.setup(variables, isData)
 		return variables
 
-	def analyzePlugins(event, variables, cuts, labels, isData):
+	def analyzePlugins(self, event, variables, cuts, labels, isData):
 		"""	Run the analyze and cut analyze routines. Also check if we should drop.
 			For 'old' (up to Treemaker v1.0) formatted plugins, analyze and makeCuts
 			are two separate calls.
@@ -133,6 +133,7 @@ class PluginRunner:
 				cuts = plugin.makeCuts(event, variables, cuts, labels, isData)				
 			else:
 				variables, cuts = plugin.analyze(event, variables, labels, isData, cuts)				
+			count += 1
 			try:
 				if plugin.drop(event, variables, cuts, labels, isData):
 					shouldDrop = True
@@ -143,7 +144,7 @@ class PluginRunner:
 		# Return a three-tuple of variables + cuts info and the shouldDrop flag.
 		return variables, cuts, shouldDrop
 
-	def resetPlugins(variables):
+	def resetPlugins(self, variables):
 		for plugin in self.plugins:
 			variables = plugin.reset(variables)
 		return variables
