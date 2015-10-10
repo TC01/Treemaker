@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+
+# Pruner for trees. Takes a tree and removes events not passing certain cuts.
+
+# Code originally written by Marc, modified by Ben to have a better CLI
+# more in line with what the other treemaker commands do.
+
+import optparse
+import os
+import sys
+
+import ROOT
+
+def rootifyName(name):
+	if not '.root' == name[-len('.root'):]:
+		return name + '.root'
+	return name
+
+def main():
+	parser = optparse.OptionParser()
+	parser.add_option('-n', '--name', dest='name', default="", help="Input filename.")
+	parser.add_option('-o', '--out', dest='out', default="", help='Output name, defaults to pruned_{Input Name}.')
+	parser.add_option('-t', '--tree', dest='tree', default='tree', help='Tree name, defaults to tree.')
+	parser.add_option('-c', '--cuts', dest='cuts', default="", help='The cut to apply to the selection')
+	parser.add_option('-u', '--use-holding', dest='useHolding', action='store_true', help="Copy first into a holding tree or not? Deprecated behavior, should not be necessary.")
+	(options, args) = parser.parse_args()
+	
+	# Get the input name into the right format.
+	name = rootifyName(options.name)
+	inputPath = os.path.abspath(os.path.expanduser(name))
+	try:
+		if not os.path.exists(inputPath):
+			raise RuntimeError
+		rootFile = ROOT.TFile(inputPath)
+	except:
+		print "Error: input filename does not exist or is invalid."
+		sys.exit(1)
+
+	tree = rootFile.Get(options.tree)
+	print "Read tree '" + options.tree + "' from file " + inputPath
+	print "Applying cut (" + options.cuts + ")..."	
+
+	# If we were told to use holding, do that.
+	if options.useHolding:
+		holdingName = rootifyName("holding_" + options.name)
+		holdingFile = ROOT.TFile(holdingName, "recreate")
+		try:
+			holdingTree = tree.CopyTree(options.cuts)
+			holdingTree.SetName(options.tree)
+		except:
+			print "Error: unable to copy tree, please check the tree name '" + options.tree + "', or the cuts string '" + options.cuts + "'"
+			sys.exit(1)
+		tree = holdingTree
+	
+	# Get the output name.
+	if options.out == "":
+		outputName = rootifyName("pruned_" + options.name)
+	else:
+		outputName = rootifyName(options.out)
+	
+	# Do not make a holding root file, if it turns out this was wrong... whoops.
+	newFile = ROOT.TFile(outputName, "recreate")
+	newFile.cd()
+	
+	# Do the copying.
+	try:
+		if options.useHolding:
+			copyTree = tree.CopyTree('')
+		else:
+			copyTree = tree.CopyTree(options.cuts)
+		copyTree.SetName(options.tree)
+	except:
+		print "Error: unable to copy tree, please check the tree name '" + options.tree + "', or the cuts string '" + options.cuts + "'"
+		sys.exit(1)
+
+	newFile.Write()
+	newFile.Save()
+
+	print "Pruned tree, wrote new ROOT file " + outputName + ", cleaning up..."
+
+	# Remove the holding file if there was one.
+	if options.useHolding:
+		os.remove(holdingName)
+	
+if __name__ == '__main__':
+	main()
