@@ -81,8 +81,7 @@ Once you have done that, run the following commands below.
 
 ```
 cd ${CMSSW_BASE}/src 
-git clone http://github.com/TC01/Treemaker/
-cd Treemaker && git checkout stable && cd ..
+git clone http://github.com/TC01/Treemaker/ -b stable
 scram build
 ```
 
