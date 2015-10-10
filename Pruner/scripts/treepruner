@@ -37,7 +37,9 @@ def main():
 		sys.exit(1)
 
 	tree = rootFile.Get(options.tree)
-	
+	print "Read tree '" + options.tree + "' from file " + inputPath
+	print "Applying cut (" + options.cuts + ")..."	
+
 	# If we were told to use holding, do that.
 	if options.useHolding:
 		holdingName = rootifyName("holding_" + options.name)
@@ -73,6 +75,8 @@ def main():
 
 	newFile.Write()
 	newFile.Save()
+
+	print "Pruned tree, wrote new ROOT file " + outputName + ", cleaning up..."
 
 	# Remove the holding file if there was one.
 	if options.useHolding:
