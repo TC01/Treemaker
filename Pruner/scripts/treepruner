@@ -54,7 +54,7 @@ def main():
 	if options.out == "":
 		outputName = rootifyName("pruned_" + options.name)
 	else:
-		outputName = rootifyName(outputName)
+		outputName = rootifyName(options.out)
 	
 	# Do not make a holding root file, if it turns out this was wrong... whoops.
 	newFile = ROOT.TFile(outputName, "recreate")
