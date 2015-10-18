@@ -3,7 +3,7 @@
 
 import sys
 import json
-import das_client_fork
+import das_client_fork as das_client
 
 def dasFileQuery(dataset):
 	query   = 'dataset dataset=%s' % dataset
