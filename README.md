@@ -1,4 +1,4 @@
-Treemaker v1.0
+Treemaker v1.1
 --------------
 
 Treemaker is a generic, extensible piece of Python software for turning
@@ -93,6 +93,10 @@ of documentation grew significantly. You can find the documentation in the
 
 Please consult that if you have any questions.
 
+A [changelog](https://github.com/TC01/Treemaker/blob/master/CHANGELOG.md)
+is maintained in the repository tracking changes since the first major
+release.
+
 # Usage:
 
 The general Treemaker workflow is something like this:
@@ -104,19 +108,13 @@ examples in the repository.
 2. Create a list of plugins, in the order you want them to run, and save it
 to a file ```plugins.list```. (The name doesn't really matter).
 
-3. Run the following command over the dataset you wish to convert.
+3. Run the following command over the dataset you wish to convert:
+```treemaker-config -p plugins.list /path/to/dataset/```.
 If it is data, and not Monte Carlo, add the ```-d``` flag. This will
 automatically generate a config file.
 
-```
-treemaker-config -p plugins.list /path/to/dataset/
-```
-
 4. Run the following command:
-
-```
-treemaker -f _name_of_config_file_
-```
+```treemaker -f _name_of_config_file_```
 
 5. Enjoy your ttrees!
 
