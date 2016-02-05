@@ -6,6 +6,9 @@ import ConfigParser
 import os
 import sys
 
+from Treemaker.Treemaker.dbsapi import constants as DBSConstants
+from Treemaker.Treemaker.dbsapi import util as DBSUtil
+
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.3"
 
@@ -95,6 +98,19 @@ def writeConfigFile(dataset, opts):
 	configParser.optionxform = str
 
 	configParser.add_section('dataset')
+
+	# Dataset validation, if we are a das://dbs/DATASET form.
+	if "das://" in dataset:
+		try:
+			dbs, name = DBSUtil.parse(dataset)
+			if not dbs in DBSConstants.instances:
+				print "Error: " + dbs + " is not a valid database instance in DAS!"
+				raise RuntimeError
+		except RuntimeError:
+			print "Error: dataset was specified using a DAS URL (das://), but was improperly formatted!"
+			print "Error: formatting should be 'das://instance/dataset'."
+			sys.exit(1)
+
 	configParser.set('dataset', 'directory', dataset)
 	configParser.set('dataset', 'is_data', str(opts.data))
 	configParser.set('dataset', 'output_file_name', opts.name)

@@ -21,6 +21,8 @@ from Treemaker.Treemaker import cuts
 from Treemaker.Treemaker import labels
 from Treemaker.Treemaker import plugins
 
+from Treemaker.Treemaker.dbsapi import dasFileQuery
+
 # Perhaps this should be configurable, but a 'timeout' for the treemaker.
 # If your jobs take longer than 12 hours to run, please make use of the
 # splitting commands. :)
@@ -129,10 +131,21 @@ def runTreemaker(treemakerConfig):
 	pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars)
 	runner = plugins.PluginRunner(pluginArray)
 
+	# Process "directory"; it may not, after all, be a directory now!
+	if 'dbs://' in directory or 'dbs://' in directory:
+		# For DAS entries, look them up using dbsapi (or the bit of it we wrote).
+		ntuples, dataset = filelist.getDASNtuples(directory)
+
+		print "*** Running treemaker over dataset " + dataset
+		if name == "":
+			name = dataset.split('/')[1]
+	else:
+		print "*** Running treemaker over " + directory
+		if name == "":
+			name = directory.rpartition("/")[2]
+		ntuples = filelist.getDiskNtuples(directory)
+
 	# Create output name
-	print "*** Running treemaker over " + directory
-	if name == "":
-		name = directory.rpartition("/")[2]
 	if not ".root" in name:
 		name += ".root"
 	if index != -1:
@@ -156,14 +169,6 @@ def runTreemaker(treemakerConfig):
 	if not linear:
 		pool = multiprocessing.Pool()
 	results = []
-	
-	# Accumulate a list of files. Subdirectories are okay.
-	ntuples = []
-	for path, dirs, files in os.walk(directory):
-#		if path == directory:
-		for ntuple in files:
-			if '.root' in ntuple:
-				ntuples.append(os.path.join(path, ntuple))
 
 	# Do splitting.
 	ntuples = sorted(ntuples)

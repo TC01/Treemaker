@@ -5,8 +5,8 @@ import sys
 import json
 import das_client_fork as das_client
 
-def dasFileQuery(dataset):
-	query   = 'dataset dataset=%s' % dataset
+def dasFileQuery(dataset, instance='prod/master'):
+	query   = 'dataset dataset=%s instance=%s' % (dataset, instance)
 	host    = 'https://cmsweb.cern.ch'      # default
 	idx     = 0                             # default
 	limit   = 0                             # unlimited
