@@ -95,26 +95,6 @@ def runOverNtuple(treemakerConfig, ntuple, outputDir, treename, offset, data=Fal
 	except KeyboardInterrupt:
 		raise KeyboardInterruptError()
 
-def doSplitting(ntuples, index, splitBy, splitInto):
-	numNtuples = len(ntuples)
-	# These cases should be mutually exclusive.
-	if splitBy > 0:
-		startJobs = int(math.ceil(numNtuples / float(splitBy))) * index
-		endJobs = int(math.ceil(numNtuples / float(splitBy))) * (index + 1)
-		if index + 1 > splitBy:
-			print "Error: cannot make this splitting with index + 1 > number of splits!"
-			sys.exit(1)
-	elif splitInto > 0:
-		startJobs = splitInto * index
-		endJobs = splitInto * (index + 1)
-
-	if (splitBy > 0 or splitInto > 0) and index >= 0:
-		if endJobs > len(ntuples):
-			endJobs = len(ntuples)
-		return ntuples[startJobs:endJobs]
-	else:
-		return ntuples
-
 #def runTreemaker(directory, treename="tree", data=False, force=False, name="", linear=False):
 def runTreemaker(treemakerConfig):
 	
@@ -132,18 +112,7 @@ def runTreemaker(treemakerConfig):
 	runner = plugins.PluginRunner(pluginArray)
 
 	# Process "directory"; it may not, after all, be a directory now!
-	if 'dbs://' in directory or 'dbs://' in directory:
-		# For DAS entries, look them up using dbsapi (or the bit of it we wrote).
-		ntuples, dataset = filelist.getDASNtuples(directory)
-
-		print "*** Running treemaker over dataset " + dataset
-		if name == "":
-			name = dataset.split('/')[1]
-	else:
-		print "*** Running treemaker over " + directory
-		if name == "":
-			name = directory.rpartition("/")[2]
-		ntuples = filelist.getDiskNtuples(directory)
+	ntuples, name = getNtuplesAndName(directory)
 
 	# Create output name
 	if not ".root" in name:
@@ -172,7 +141,7 @@ def runTreemaker(treemakerConfig):
 
 	# Do splitting.
 	ntuples = sorted(ntuples)
-	splitNtuples = doSplitting(ntuples, index, treemakerConfig.splitBy, treemakerConfig.splitInto)
+	splitNtuples, numJobs = filelist.doSplitting(ntuples, index, treemakerConfig.splitBy, treemakerConfig.splitInto)
 
 	if len(splitNtuples) == 0:
 		print "Error: no ntuples to run over!"
