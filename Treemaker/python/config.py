@@ -56,7 +56,10 @@ class TreemakerConfig:
 		try:
 			self.directory = configParser.get('dataset', 'directory')
 			self.directory = os.path.abspath(os.path.expanduser(self.directory))
-			if not os.path.exists(self.directory):
+			
+			# For now, if this is a root:// or das:// or dbs://..
+			# we'll just pretend it's okay and catch the problem later.			
+			if not os.path.exists(self.directory) and not ('root://' in self.directory or 'das://' in self.directory or 'dbs://' in self.directory):
 				print "Error: directory '" + directory + "' does not exist!"
 				raise RuntimeError
 		except:
