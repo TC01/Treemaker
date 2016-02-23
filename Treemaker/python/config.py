@@ -55,13 +55,13 @@ class TreemakerConfig:
 		# Parse the directory option.
 		try:
 			self.directory = configParser.get('dataset', 'directory')
-			self.directory = os.path.abspath(os.path.expanduser(self.directory))
 			
-			# For now, if this is a root:// or das:// or dbs://..
-			# we'll just pretend it's okay and catch the problem later.			
-			if not os.path.exists(self.directory) and not ('root://' in self.directory or 'das://' in self.directory or 'dbs://' in self.directory):
-				print "Error: directory '" + directory + "' does not exist!"
-				raise RuntimeError
+			# For now, do no validation here if we're not just a directory.
+			if not ('root://' in self.directory or 'das://' in self.directory or 'dbs://' in self.directory):
+				self.directory = os.path.abspath(os.path.expanduser(self.directory))
+				if not os.path.exists(self.directory):
+					print "Error: directory '" + directory + "' does not exist!"
+					raise RuntimeError
 		except:
 			print "Error: Invalid option for 'directory' in config file."
 		

@@ -39,7 +39,7 @@ def getXRDNtuples(directory):
 			for string in array:
 				searchString = uri + "//" + string
 				if '.root' in string:
-					results.append(string)
+					results.append(searchString)
 				elif string.lstrip().rstrip() == '':
 					continue
 				else:
