@@ -71,7 +71,7 @@ def doSplitting(ntuples, index, splitBy, splitInto):
 		return ntuples, numJobs
 
 def getNtuplesAndName(directory):
-	if 'dbs://' in directory or 'dbs://' in directory:
+	if 'dbs://' in directory or 'das://' in directory:
 		# For DAS entries, look them up using dbsapi (or the bit of it we wrote).
 		ntuples, dataset = getDASNtuples(directory)
 

@@ -7,7 +7,6 @@ import os
 import sys
 
 from Treemaker.Treemaker.dbsapi import constants as DBSConstants
-from Treemaker.Treemaker.dbsapi import util as DBSUtil
 
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.3"
@@ -100,9 +99,10 @@ def writeConfigFile(dataset, opts):
 	configParser.add_section('dataset')
 
 	# Dataset validation, if we are a das://dbs/DATASET form.
-	if "das://" in dataset:
+	if "das://" in dataset or 'dbs://' in directory:
 		try:
-			dbs, name = DBSUtil.parse(dataset)
+			_, _, dasName = directory.partition("://")
+			dbs, _, dataset = dasName.partition(":")
 			if not dbs in DBSConstants.instances:
 				print "Error: " + dbs + " is not a valid database instance in DAS!"
 				raise RuntimeError
