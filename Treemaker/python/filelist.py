@@ -49,6 +49,7 @@ def doSplitting(ntuples, index, splitBy, splitInto):
 	"""	Do job splitting. Given splitting options, a list of files (strings) and an index,
 		splits the files and returns the (index)th set of files to process. Also returns
 		the total number of jobs needed."""
+	numJobs = 1
 	numNtuples = len(ntuples)
 	# These cases should be mutually exclusive.
 	if splitBy > 0:
