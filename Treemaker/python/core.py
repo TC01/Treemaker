@@ -18,10 +18,9 @@ from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
 from Treemaker.Treemaker import cuts
+from Treemaker.Treemaker import filelist
 from Treemaker.Treemaker import labels
 from Treemaker.Treemaker import plugins
-
-from Treemaker.Treemaker.dbsapi import dasFileQuery
 
 # Perhaps this should be configurable, but a 'timeout' for the treemaker.
 # If your jobs take longer than 12 hours to run, please make use of the
