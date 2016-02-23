@@ -88,3 +88,4 @@ def getNtuplesAndName(directory, name=""):
 		if name == "":
 			name = directory.rpartition("/")[2]
 		ntuples = getDiskNtuples(directory)
+	return ntuples, name
