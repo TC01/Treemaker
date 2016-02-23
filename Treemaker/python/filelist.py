@@ -25,12 +25,23 @@ def getXRDNtuples(directory):
 	"""	Given an xrootd directory, attempt to use xrdfs to get a list of ntuples to
 		run over. Returns a list of ntuples in xrootd form."""
 	uri, _, path = directory.partition("///")
+	path = "/" + path
 	try:
-		output = subprocess.check_output("xrdfs", uri, "ls", path)
-		if "[FATAL]" in output:
+		# Expand sub-directories by recursively running this function...
+		# assume that directories aren't named .root?
+		# this is bad and should be rewritten. XXX
+		output = subprocess.check_output(["xrdfs", uri, "ls", path])
+		if "[FATAL]" in output or "[ERROR]" in output:
 			return []
 		else:
-			return output.split('\n')
+			array = output.split('\n')
+			results = []
+			for string in array:
+				searchString = uri + "//" + string
+				if '.root' in string:
+					results.append(string)
+				else:
+					results.extend(getXRDNtuples(searchString))
 	except OSError:
 		print "Error: the xrdfs program is not installed! Cannot proceed!"
 		sys.exit(1)
