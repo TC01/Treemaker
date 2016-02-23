@@ -40,8 +40,13 @@ def getXRDNtuples(directory):
 				searchString = uri + "//" + string
 				if '.root' in string:
 					results.append(string)
+				elif string.lstrip().rstrip() == '':
+					continue
 				else:
 					results.extend(getXRDNtuples(searchString))
+			return results
+	except subprocess.CalledProcessError:
+		return []
 	except OSError:
 		print "Error: the xrdfs program is not installed! Cannot proceed!"
 		sys.exit(1)
