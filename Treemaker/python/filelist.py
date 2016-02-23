@@ -73,7 +73,7 @@ def doSplitting(ntuples, index, splitBy, splitInto):
 def getNtuplesAndName(directory):
 	if 'dbs://' in directory or 'dbs://' in directory:
 		# For DAS entries, look them up using dbsapi (or the bit of it we wrote).
-		ntuples, dataset = filelist.getDASNtuples(directory)
+		ntuples, dataset = getDASNtuples(directory)
 
 		print "*** Running treemaker over dataset " + dataset
 		if name == "":
@@ -82,9 +82,9 @@ def getNtuplesAndName(directory):
 		print "*** Running treemaker via xrootd over " + directory
 		if name == "":
 			name = directory.rpartition("/")[2]
-		ntuples = filelist.getXRDNtuples(directory)		
+		ntuples = getXRDNtuples(directory)		
 	else:
 		print "*** Running treemaker over " + directory
 		if name == "":
 			name = directory.rpartition("/")[2]
-		ntuples = filelist.getDiskNtuples(directory)
+		ntuples = getDiskNtuples(directory)

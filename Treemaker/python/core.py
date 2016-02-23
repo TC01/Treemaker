@@ -112,7 +112,7 @@ def runTreemaker(treemakerConfig):
 	runner = plugins.PluginRunner(pluginArray)
 
 	# Process "directory"; it may not, after all, be a directory now!
-	ntuples, name = getNtuplesAndName(directory)
+	ntuples, name = filelist.getNtuplesAndName(directory)
 
 	# Create output name
 	if not ".root" in name:
