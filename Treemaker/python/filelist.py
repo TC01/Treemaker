@@ -3,6 +3,7 @@ Routines to get the list of files to run over.
 """
 
 import os
+import subprocess
 import sys
 
 from Treemaker.Treemaker.dbsapi import dasFileQuery
@@ -19,6 +20,20 @@ def getDASNtuples(directory):
 	rawNtuples = dasFileQuery.dasFileQuery(dataset, dbs)
 	ntuples = ["root://cmsxrootd.fnal.gov//" + ntuple for ntuple in rawNtuples]
 	return ntuples, dataset
+
+def getXRDNtuples(directory):
+	"""	Given an xrootd directory, attempt to use xrdfs to get a list of ntuples to
+		run over. Returns a list of ntuples in xrootd form."""
+	uri, _, path = directory.partition("///")
+	try:
+		output = subprocess.check_output("xrdfs", uri, "ls", path)
+		if "[FATAL]" in output:
+			return []
+		else:
+			return output.split('\n')
+	except OSError:
+		print "Error: the xrdfs program is not installed! Cannot proceed!"
+		sys.exit(1)
 
 def getDiskNtuples(directory):
 	"""	Given a directory on a proper filesystem, return a list of ntuples to run over."""
@@ -63,6 +78,11 @@ def getNtuplesAndName(directory):
 		print "*** Running treemaker over dataset " + dataset
 		if name == "":
 			name = dataset.split('/')[1]
+	elif 'root://' in directory:
+		print "*** Running treemaker via xrootd over " + directory
+		if name == "":
+			name = directory.rpartition("/")[2]
+		ntuples = filelist.getXRDNtuples(directory)		
 	else:
 		print "*** Running treemaker over " + directory
 		if name == "":

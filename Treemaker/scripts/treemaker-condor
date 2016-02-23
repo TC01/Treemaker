@@ -71,8 +71,8 @@ def main():
 		
 		# Process "directory"; it may not, after all, be a directory now!
 		# Then run the splitting routine.
-		ntuples, name = getNtuplesAndName(directory)
-		ntuples, numJobs = doSplitting(ntuples, 0, splitBy, splitInto)
+		ntuples, name = filelist.getNtuplesAndName(directory)
+		ntuples, numJobs = filelist.doSplitting(ntuples, 0, splitBy, splitInto)
 
 		# Now, write out the condor rules for the number of jobs we have.
 		for i in range(numJobs):
