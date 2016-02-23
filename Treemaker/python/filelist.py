@@ -98,11 +98,11 @@ def getNtuplesAndName(directory, name=""):
 	elif 'root://' in directory:
 		print "*** Running treemaker via xrootd over " + directory
 		if name == "":
-			name = directory.rpartition("/")[2]
+			name = directory.rstrip('/').rpartition("/")[2]
 		ntuples = getXRDNtuples(directory)		
 	else:
 		print "*** Running treemaker over " + directory
 		if name == "":
-			name = directory.rpartition("/")[2]
+			name = directory.rstrip('/').rpartition("/")[2]
 		ntuples = getDiskNtuples(directory)
 	return ntuples, name
