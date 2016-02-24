@@ -78,9 +78,12 @@ class TreemakerConfig:
 		if self.splitBy != -1 and self.splitInto != -1:
 			print "Error: cannot set both split_into and split_by at the same time."
 
-		# Parse source type options.
-		self.inputType = self.parseOption(configParser, 'input', 'input_type', constants.default_input_type)
-		self.sourceTreeName = self.parseOption(configParser, 'input', 'source_tree_name', '')
+		# Parse source type options; this is an optional section.
+		try:
+			self.inputType = self.parseOption(configParser, 'input', 'input_type', constants.default_input_type)
+			self.sourceTreeName = self.parseOption(configParser, 'input', 'source_tree_name', '')
+		except ConfigParser.NoSectionError:
+			pass
 
 		# Parse any config options.
 		try:
