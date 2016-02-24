@@ -154,7 +154,7 @@ def runTreemaker(treemakerConfig):
 	index = treemakerConfig.splitIndex
 	
 	# Load the plugins once for checking before we start.
-	pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars)
+	pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, inputType=treemakerConfig.inputType)
 	runner = plugins.PluginRunner(pluginArray)
 
 	# Process "directory"; it may not, after all, be a directory now!

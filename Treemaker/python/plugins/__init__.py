@@ -48,7 +48,7 @@ def loadPlugins(pluginNames, parameters={}, silent=False, input_type=""):
 
 	# Decide what we're running over.
 	if input_type == "":
-		input_type == constants.default_input_type
+		input_type = constants.default_input_type
 
 	# Now, use imp to load all the plugins we specified
 	for name in names:
@@ -74,7 +74,7 @@ def loadPlugins(pluginNames, parameters={}, silent=False, input_type=""):
 				# Complain if a plugin's input type is != what we expect.
 				try:
 					if plugin.input_type != input_type:
-						print "Error: plugin " + name + "runs over input type '" + plugin.input_type + "', but we were asked to run over '" + input_type + "'!"
+						print "Error: plugin " + name + " runs over input type '" + plugin.input_type + "', but we were asked to run over '" + input_type + "'!"
 						print "Ignoring this plugin."
 						continue
 				# This means we have the default input type.
