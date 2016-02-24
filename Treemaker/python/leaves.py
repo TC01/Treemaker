@@ -31,7 +31,6 @@ def parseKeyList(tObject, keys, leaves, pathName=''):
 				leaves = parseKeyList(newObject, newObject.GetListOfKeys(), leaves, newName)
 		except:
 			pass
-		nextKey.Print()
 		nextKey = iterator.Next()
 	return leaves
 
@@ -61,3 +60,4 @@ def fillLeaves(tree, leaves, index):
 	tree.GetEntry(index)
 	for leaf in leaves.iterkeys():
 		leaves[leaf] = eval("tree." + leaf)
+	return leaves
