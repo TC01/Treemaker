@@ -9,8 +9,26 @@ import sys
 
 import ROOT
 
+# Leaf sub-dictionary, subclass of actual dict. Does lazy loading!
+# Based on the LabelSubDict. I didn't think we'd need this but maybe we do.
+class LeafSubDict(dict):
+	
+	def __init__(self, *args, **kwargs):
+		dict.__init__(self, *args, **kwargs)
+		self.tree = None
+
+	def __getitem__(self, key):
+		value = dict.__getitem__(self, key)
+
+		# Implement lazy loading; if this is empty, fill it.
+		if value == None and self.tree is not None:
+			exec("value = self.tree." + key)
+			dict.__setitem__(self, key, value)
+
+		return value
+
 def getTreeLeaves(tree):
-	leafDict = {}
+	leafDict = LeafSubDict()
 	leaves = tree.GetListOfLeaves()
 	for leaf in leaves:
 		leafDict[leaf.GetName()] = None
@@ -58,6 +76,8 @@ def getLeaves(rootFile):
 def fillLeaves(tree, leaves, index):
 	"""	Given a tree, fill it and fill the leaves (sub)dictionary."""
 	tree.GetEntry(index)
+	leaves.tree = tree
 	for leaf in leaves.iterkeys():
-		leaves[leaf] = eval("tree." + leaf)
+		# Actually, do lazy loading.
+		leaves[leaf] = None
 	return leaves
