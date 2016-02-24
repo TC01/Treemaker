@@ -55,6 +55,6 @@ def drop(event, variables, cutArray, leaves, isData):
 	for i in range(min(numAK8s, 4)):		
 		if leaves['jetAK8_prunedMass'][i] > 50 and leaves['jetAK8_Pt'][i] > 200 and math.fabs(leaves['jetAK8_Eta'][0]) < 2.1:
 			nTagJets += 1
-	if nTagJets != 1
+	if nTagJets != 1:
 		return True
 	return False

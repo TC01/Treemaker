@@ -135,6 +135,10 @@ def writeConfigFile(dataset, opts):
 
 	# Add a section on input type. If not present this defaults to Ntuple.
 	configParser.add_section('input')
+	inputType = opts.inputType
+	if not inputType in constants.input_types:
+		print "Error: invalid input format '" + inputType + "' specified!"
+		sys.exit(1)
 	configParser.set('input', 'input_type', opts.inputType)
 	configParser.set('input', 'source_tree_name', opts.sourceTreeName)
 
