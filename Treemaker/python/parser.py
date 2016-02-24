@@ -40,7 +40,7 @@ def getConfigParser():
 	parser.add_option("-t", "--treename", dest="treename", help="The name of the output TTree object.", default=config.defaultTreeName)
 
 	# Input type options.
-	parser.add_option('-i', '--input-format', dest="inputFormat", help="The input format. Acceptable values include Tree and Ntuple.", default=constants.default_input_type)
+	parser.add_option('-i', '--input-format', dest="inputType", help="The input format. Acceptable values include Tree and Ntuple.", default=constants.default_input_type)
 	parser.add_option('-s', '--source-tree', dest="sourceTreeName", help="Name of the ROOT Tree to run over, if input-format is Tree.", default="")
 
 	return parser
