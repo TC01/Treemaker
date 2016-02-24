@@ -155,7 +155,7 @@ def runTreemaker(treemakerConfig):
 	index = treemakerConfig.splitIndex
 
 	# Output what input type we are.
-	inputType = treemakerConfig.inputType)
+	inputType = treemakerConfig.inputType
 	if not inputType in constants.input_types:
 		print "Error: invalid input format '" + inputType + "' specified!"
 		sys.exit(1)
