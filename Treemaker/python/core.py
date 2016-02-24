@@ -17,7 +17,6 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
-from Treemaker.Treemaker import constants
 from Treemaker.Treemaker import cuts
 from Treemaker.Treemaker import filelist
 from Treemaker.Treemaker import labels
@@ -74,7 +73,12 @@ def runOverNtuple(ntuple, tree, runner, labelDict, variables, cutDict, cutArray,
 			cutArray[cut.index] = 0
 			cut.passed = 0
 
-def runOverFile(treemakerConfig, ntuple, outputDir, treename, offset, data=False, inputType=constants.default_input_type):
+def runOverFile(treemakerConfig, ntuple, outputDir, treename, offset, data=False):
+	
+	# Load input type from configuration object.
+	inputType = treemakerConfig.inputType
+	
+	# Large try/except block.
 	try:
 		
 		# Load plugins, silently, turn them into a class.
