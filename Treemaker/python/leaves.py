@@ -11,24 +11,24 @@ import ROOT
 
 def getTreeLeaves(tree):
 	leafDict = {}
-	# XXX: I'm not *sure* if this will work.
 	leaves = tree.GetListOfLeaves()
 	for leaf in leaves:
 		leafDict[leaf.GetName()] = None
 	return leafDict
 
-def parseKeyList(tObject, keys, leaves):
+def parseKeyList(tObject, keys, leaves, pathName=''):
 	iterator = ROOT.TListIter(keys)
 	nextKey = iterator.Next()
 	while not nextKey is None and nextKey != None:
 		keyName = nextKey.GetName()
+		newName = os.path.join(pathName, keyName)
 		try:
 			newObject = tObject.Get(keyName)
 			if isinstance(newObject, ROOT.TTree):
 				subLeaves = getTreeLeaves(newObject)
-				leaves[keyName] = subLeaves
+				leaves[newName] = subLeaves
 			elif isinstance(newObject, ROOT.TDirectoryFile):
-				leaves = printKeyList(newObject, newObject.GetListOfKeys(), leaves)
+				leaves = parseKeyList(newObject, newObject.GetListOfKeys(), leaves, newName)
 		except:
 			pass
 		nextKey.Print()
@@ -44,7 +44,7 @@ def getLeaves(rootFile):
 	try:
 		tFile = ROOT.TFile(os.path.abspath(rootFile))
 		keys = tFile.GetListOfKeys()
-		leaves = parseKeyList(tfile, keys, leaves)
+		leaves = parseKeyList(tFile, keys, leaves)
 		tFile.Close()
 	except IndexError:
 		print "Error: invalid ROOT file specified!"
