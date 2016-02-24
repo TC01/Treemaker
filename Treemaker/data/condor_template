@@ -7,6 +7,11 @@ request_memory = 199
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 
+# This might be necessary according to:
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookXrootdService#DownCmd
+# If it isn't, at least add the string for later.
+#use_x509userproxy = true
+
 Transfer_Input_Files=$INPUT_FILES
 Transfer_Output_Files=output_$(Cluster)_$(Process)
 

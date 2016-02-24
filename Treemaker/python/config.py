@@ -6,6 +6,8 @@ import ConfigParser
 import os
 import sys
 
+from Treemaker.Treemaker.dbsapi import constants as DBSConstants
+
 # Used so trees from multiple versions do not get hadd'd together.
 version = "0.3"
 
@@ -53,10 +55,13 @@ class TreemakerConfig:
 		# Parse the directory option.
 		try:
 			self.directory = configParser.get('dataset', 'directory')
-			self.directory = os.path.abspath(os.path.expanduser(self.directory))
-			if not os.path.exists(self.directory):
-				print "Error: directory '" + directory + "' does not exist!"
-				raise RuntimeError
+			
+			# For now, do no validation here if we're not just a directory.
+			if not ('root://' in self.directory or 'das://' in self.directory or 'dbs://' in self.directory):
+				self.directory = os.path.abspath(os.path.expanduser(self.directory))
+				if not os.path.exists(self.directory):
+					print "Error: directory '" + directory + "' does not exist!"
+					raise RuntimeError
 		except:
 			print "Error: Invalid option for 'directory' in config file."
 		
@@ -95,6 +100,20 @@ def writeConfigFile(dataset, opts):
 	configParser.optionxform = str
 
 	configParser.add_section('dataset')
+
+	# Dataset validation, if we are a das://dbs/DATASET form.
+	if "das://" in dataset or 'dbs://' in directory:
+		try:
+			_, _, dasName = directory.partition("://")
+			dbs, _, dataset = dasName.partition(":")
+			if not dbs in DBSConstants.instances:
+				print "Error: " + dbs + " is not a valid database instance in DAS!"
+				raise RuntimeError
+		except RuntimeError:
+			print "Error: dataset was specified using a DAS URL (das://), but was improperly formatted!"
+			print "Error: formatting should be 'das://instance/dataset'."
+			sys.exit(1)
+
 	configParser.set('dataset', 'directory', dataset)
 	configParser.set('dataset', 'is_data', str(opts.data))
 	configParser.set('dataset', 'output_file_name', opts.name)

@@ -9,6 +9,7 @@ import shutil
 import sys
 
 from Treemaker.Treemaker import config
+from Treemaker.Treemaker import filelist
 from Treemaker.Treemaker import parser
 
 pluginDir = "src/Treemaker/Treemaker/python/plugins"
@@ -67,17 +68,13 @@ def main():
 
 		# Job-splitting support.
 		numJobs = 1
-		if treemakerConfig.splitInto > 0:
-			# dammit, this code is being reused, this should be made better.
-			ntuples = []
-			for path, dirs, files in os.walk(treemakerConfig.directory):
-#				if path == directory:
-				for ntuple in files:
-					if '.root' in ntuple:
-						ntuples.append(os.path.join(path, ntuple))
-			numJobs = int(math.ceil(len(ntuples) / float(treemakerConfig.splitInto)))
-		if treemakerConfig.splitBy > 0:
-			numJobs = treemakerConfig.splitBy
+		
+		# Process "directory"; it may not, after all, be a directory now!
+		# Then run the splitting routine.
+		ntuples, name = filelist.getNtuplesAndName(directory)
+		ntuples, numJobs = filelist.doSplitting(ntuples, 0, splitBy, splitInto)
+
+		# Now, write out the condor rules for the number of jobs we have.
 		for i in range(numJobs):
 			text += "Arguments = output_$(Cluster)_$(Process)"
 			if numJobs > 1:
