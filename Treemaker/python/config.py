@@ -108,7 +108,7 @@ def writeConfigFile(dataset, opts):
 	configParser.add_section('dataset')
 
 	# Dataset validation, if we are a das://dbs/DATASET form.
-	if "das://" in dataset or 'dbs://' in directory:
+	if "das://" in dataset or 'dbs://' in dataset:
 		try:
 			_, _, dasName = directory.partition("://")
 			dbs, _, dataset = dasName.partition(":")
