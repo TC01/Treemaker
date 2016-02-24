@@ -33,7 +33,7 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 						names.append(filename)
 	return names
 
-def loadPlugins(pluginNames, parameters={}, silent=False, input_type=""):
+def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 	global plugins
 	
 	# Get a list of all possible plugin names
@@ -47,8 +47,8 @@ def loadPlugins(pluginNames, parameters={}, silent=False, input_type=""):
 		sys.exit(1)
 
 	# Decide what we're running over.
-	if input_type == "":
-		input_type = constants.default_input_type
+	if inputType == "":
+		inputType = constants.default_input_type
 
 	# Now, use imp to load all the plugins we specified
 	for name in names:
@@ -73,15 +73,15 @@ def loadPlugins(pluginNames, parameters={}, silent=False, input_type=""):
 
 				# Complain if a plugin's input type is != what we expect.
 				try:
-					if plugin.input_type != input_type:
-						print "Error: plugin " + name + " runs over input type '" + plugin.input_type + "', but we were asked to run over '" + input_type + "'!"
+					if plugin.input_type != inputType:
+						print "Error: plugin " + name + " runs over input type '" + plugin.input_type + "', but we were asked to run over '" + inputType + "'!"
 						print "Ignoring this plugin."
 						continue
 				# This means we have the default input type.
 				except AttributeError:
-					if input_type != constants.default_input_type:
+					if inputType != constants.default_input_type:
 						print "Error: plugin " + name + "had no input type specified!"
-						print "The default input type is '" + constants.default_input_type + "', but we were asked to run over '" + input_type + "'!"
+						print "The default input type is '" + constants.default_input_type + "', but we were asked to run over '" + inputType + "'!"
 						print "Ignoring this plugin."
 						continue
 
