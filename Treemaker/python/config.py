@@ -83,7 +83,8 @@ class TreemakerConfig:
 			self.inputType = self.parseOption(configParser, 'input', 'input_type', constants.default_input_type)
 			self.sourceTreeName = self.parseOption(configParser, 'input', 'source_tree_name', '')
 		except ConfigParser.NoSectionError:
-			pass
+			self.inputType = constants.default_input_type
+			self.sourceTreeName = ""
 
 		# Parse any config options.
 		try:
