@@ -22,6 +22,7 @@ def setup(variables, isData):
 	return variables
 
 def analyze(event, variables, leaves, isData, cutArray):
+	numAK8s = leaves['jetAK8_size']
 	for i in range(min(numAK8s, 4)):		
 		if leaves['jetAK8_prunedMass'][i] > 50 and leaves['jetAK8_Pt'][i] > 200 and math.fabs(leaves['jetAK8_Eta'][0]) < 2.1:
 			tagJet = i
