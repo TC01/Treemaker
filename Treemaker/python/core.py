@@ -17,6 +17,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
+from Treemaker.Treemaker import constants
 from Treemaker.Treemaker import cuts
 from Treemaker.Treemaker import filelist
 from Treemaker.Treemaker import labels
@@ -84,12 +85,12 @@ def runOverFile(treemakerConfig, ntuple, outputDir, treename, offset, data=False
 		# Load plugins, silently, turn them into a class.
 		pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, True, inputType)
 		runner = plugins.PluginRunner(pluginArray)
-		
+
 		print "**** Processing file: " + ntuple
 		outputName = os.path.join(outputDir, str(offset) + "_" + ntuple.rpartition("/")[2])
 		output = ROOT.TFile(outputName, "RECREATE")
 		tree = ROOT.TTree(treename, treename)
-	
+
 		# Create the label/leaf dictionary.
 		if inputType == "Ntuple":
 			labelDict = labels.getLabels(ntuple)
@@ -115,7 +116,7 @@ def runOverFile(treemakerConfig, ntuple, outputDir, treename, offset, data=False
 		for i in xrange(len(ordered)):
 			name = ordered[i]
 			cutDict[name].index = i
-		
+
 		# Run over the actual file, depending on what type of file it is!
 		if inputType == "Ntuple":
 			runOverNtuple(ntuple, tree, runner, labelDict, variables, cutDict, cutArray, data)
@@ -152,9 +153,16 @@ def runTreemaker(treemakerConfig):
 	force = treemakerConfig.force
 	treename = treemakerConfig.treeName
 	index = treemakerConfig.splitIndex
-	
+
+	# Output what input type we are.
+	inputType = treemakerConfig.inputType)
+	if not inputType in constants.input_types:
+		print "Error: invalid input format '" + inputType + "' specified!"
+		sys.exit(1)
+	print "*** Running treemaker in " + inputType + " mode."
+
 	# Load the plugins once for checking before we start.
-	pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, inputType=treemakerConfig.inputType)
+	pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, inputType=inputType)
 	runner = plugins.PluginRunner(pluginArray)
 
 	# Process "directory"; it may not, after all, be a directory now!
@@ -198,9 +206,9 @@ def runTreemaker(treemakerConfig):
 #		workingNtuple = os.path.join(path, ntuple)
 		workingNtuple = ntuple
 		if linear:
-			runOverNtuple(treemakerConfig, workingNtuple, outputDir, treename, offset, data)
+			runOverFile(treemakerConfig, workingNtuple, outputDir, treename, offset, data)
 		else:
-			result = pool.apply_async(runOverNtuple, (treemakerConfig, workingNtuple, outputDir, treename, offset, data, ))
+			result = pool.apply_async(runOverFile, (treemakerConfig, workingNtuple, outputDir, treename, offset, data, ))
 			results.append(result)
 		offset += 1
 
