@@ -17,9 +17,11 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from DataFormats.FWLite import Events, Handle
 
 # Our own libraries.
+from Treemaker.Treemaker import constants
 from Treemaker.Treemaker import cuts
 from Treemaker.Treemaker import filelist
 from Treemaker.Treemaker import labels
+from Treemaker.Treemaker import leaves
 from Treemaker.Treemaker import plugins
 
 # Perhaps this should be configurable, but a 'timeout' for the treemaker.
@@ -31,21 +33,65 @@ treemakerTimeout = 43200	# (60 * 60 * 12) seconds
 # https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool
 class KeyboardInterruptError(Exception): pass
 
-def runOverNtuple(treemakerConfig, ntuple, outputDir, treename, offset, data=False):
+def runOverTree(inputTree, tree, runner, labelDict, variables, cutDict, cutArray, data):
+	"""	Run over a ttree, not a ntuple."""
+	numEntries = inputTree.GetEntries()
+	for i in range(numEntries):
+		labelDict = leaves.fillLeaves(inputTree, labelDict, i)
+
+		variables, cutDict, shouldDrop = runner.analyzePlugins(inputTree, variables, cutDict, labelDict, data)
+		for name, cut in cutDict.iteritems():
+			cutArray[cut.index] = cut.passed
+
+		# Check if any plugin says that we should drop the event.
+		# If the event is being dropped, simply don't call Fill()
+		if not shouldDrop:
+			tree.Fill()
+
+		# Reset our variables and cuts dictionaries.
+		variables = runner.resetPlugins(variables)
+		for name, cut in cutDict.iteritems():
+			cutArray[cut.index] = 0
+			cut.passed = 0
+
+def runOverNtuple(ntuple, tree, runner, labelDict, variables, cutDict, cutArray, data):
+	# Now, run over all events.
+	for event in Events(ntuple):
+		labelDict = labels.fillLabels(event, labelDict)
+
+		variables, cutDict, shouldDrop = runner.analyzePlugins(event, variables, cutDict, labelDict, data)
+		for name, cut in cutDict.iteritems():
+			cutArray[cut.index] = cut.passed
+
+		# Check if any plugin says that we should drop the event.
+		# If the event is being dropped, simply don't call Fill()
+		if not shouldDrop:
+			tree.Fill()
+
+		# Reset our variables and cuts dictionaries.
+		variables = runner.resetPlugins(variables)
+		for name, cut in cutDict.iteritems():
+			cutArray[cut.index] = 0
+			cut.passed = 0
+
+def runOverFile(treemakerConfig, ntuple, outputDir, treename, offset, data=False, inputType=constants.default_input_type):
 	try:
 		
 		# Load plugins, silently, turn them into a class.
-		pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, True)
+		pluginArray = plugins.loadPlugins(treemakerConfig.pluginNames, treemakerConfig.configVars, True, inputType)
 		runner = plugins.PluginRunner(pluginArray)
 		
-		print "**** Processing ntuple: " + ntuple
+		print "**** Processing file: " + ntuple
 		outputName = os.path.join(outputDir, str(offset) + "_" + ntuple.rpartition("/")[2])
 		output = ROOT.TFile(outputName, "RECREATE")
 		tree = ROOT.TTree(treename, treename)
 	
-		# Create the label dictionary.
-		labelDict = labels.getLabels(ntuple)
-	
+		# Create the label/leaf dictionary.
+		if inputType == "Ntuple":
+			labelDict = labels.getLabels(ntuple)
+		elif inputType == "Tree":
+			labelDict = leaves.getLeaves(ntuple)
+
 		# Set up branches for all variables declared by loaded plugins.
 		# Do this setup in sorted alphabetical order by variable name.
 		variables = {}
@@ -66,30 +112,27 @@ def runOverNtuple(treemakerConfig, ntuple, outputDir, treename, offset, data=Fal
 			name = ordered[i]
 			cutDict[name].index = i
 		
-		# Now, run over all events.
-		for event in Events(ntuple):
-			labelDict = labels.fillLabels(event, labelDict)
+		# Run over the actual file, depending on what type of file it is!
+		if inputType == "Ntuple":
+			runOverNtuple(ntuple, tree, runner, labelDict, variables, cutDict, cutArray, data)
+		elif inputType == "Tree":
+			# This is a bit more complicated for a tree. We have to load the actual tree structure.
+			sourceName = treemakerConfig.sourceTreeName
+			if not sourceName in labelDict.keys():
+				print "Error: tree " + sourceName + " does not exist in the ROOT file " + ntuple + "!"
+				return
+			inputFile = ROOT.TFile.Open(ntuple)
+			inputTree = inputFile.Get(sourceName)
+			leafDict = labelDict[sourceName]
+			runOverTree(inputTree, tree, runner, leafDict, variables, cutDict, cutArray, data)
+			inputFile.Close()
 
-			variables, cutDict, shouldDrop = runner.analyzePlugins(event, variables, cutDict, labelDict, data)
-			for name, cut in cutDict.iteritems():
-				cutArray[cut.index] = cut.passed
-
-			# Check if any plugin says that we should drop the event.
-			# If the event is being dropped, simply don't call Fill()
-			if not shouldDrop:
-				tree.Fill()
-
-			# Reset our variables and cuts dictionaries.
-			variables = runner.resetPlugins(variables)
-			for name, cut in cutDict.iteritems():
-				cutArray[cut.index] = 0
-				cut.passed = 0
-
+		# Cleanup, write files to disk.
 		output.cd()
 		tree.Write()
 		output.Write()
 		output.Close()
-		print "**** Finished processing ntuple " + ntuple
+		print "**** Finished processing file " + ntuple
 
 	except KeyboardInterrupt:
 		raise KeyboardInterruptError()
