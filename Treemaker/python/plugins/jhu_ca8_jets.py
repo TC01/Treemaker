@@ -145,11 +145,12 @@ def analyze(event, variables, labels, isData, cutArray):
 
 	return variables, cutArray
 
-def reset(variables):
-	for jet in jets:
-		variables = jet.reset(variables)
-	variables['numjets'][0] = 0.0
-	return variables
+# Reset is now done for us!
+#def reset(variables):
+#	for jet in jets:
+#		variables = jet.reset(variables)
+#	variables['numjets'][0] = 0.0
+#	return variables
 
 def drop(event, variables, cutArray, labels, isData):
 	# Only keep events with numjets >= numJets (3).

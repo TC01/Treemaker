@@ -72,6 +72,10 @@ def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 					except AttributeError:
 						pass
 
+					# This is a cleaner way to do the same thing.
+					if inspect.isfunction(plugin.reset):
+						print "Error: deprecated reset function is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
+
 				# Complain if a plugin's input type is != what we expect.
 				try:
 					if plugin.input_type != inputType:
@@ -177,8 +181,10 @@ class PluginRunner:
 	def resetPlugins(self, variables):
 
 		# Let plugins call their own reset logic if they really want.
+		# Use inspect to test for the existence of the reset function
 		for plugin in self.plugins:
-			variables = plugin.reset(variables)
+			if inspect.isfunction(plugin.reset):
+				variables = plugin.reset(variables)
 
 		# Now mass reset everything.
 		# Problem: this scribbles over the reset() calls of individual plugins.
