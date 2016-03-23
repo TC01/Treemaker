@@ -82,6 +82,8 @@ class TreemakerConfig:
 		try:
 			self.inputType = self.parseOption(configParser, 'input', 'input_type', constants.default_input_type)
 			self.sourceTreeName = self.parseOption(configParser, 'input', 'source_tree_name', '')
+			if self.inputType != 'Tree' and self.sourceTreeName != '':
+				print "Warning: source tree name specified, but Treemaker not running in tree mode."
 		except ConfigParser.NoSectionError:
 			self.inputType = constants.default_input_type
 			self.sourceTreeName = ""
