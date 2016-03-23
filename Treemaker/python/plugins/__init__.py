@@ -1,3 +1,4 @@
+import copy
 import imp
 import inspect
 import os
@@ -8,8 +9,6 @@ import sys
 # http://bitbucket.org/TC01/hex in an unrelated project.
 
 from Treemaker.Treemaker import constants
-
-plugins = []
 
 ## Helper functions.
 def getScriptLocation():
@@ -34,8 +33,8 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 	return names
 
 def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
-	global plugins
-	
+	plugins = []
+
 	# Get a list of all possible plugin names
 	names = getPossiblePluginNames(pluginNames.keys())
 	pluginDict = {}
@@ -53,10 +52,17 @@ def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 	# Now, use imp to load all the plugins we specified
 	for name in names:
 		try:
-			test = sys.modules[name]
+
+			# If the plugin was already loaded, behavior depends on the silent flag.
+			# silent = False means this is the first time we're running (so warnings get printed, etc.)
+			# silent = True means it's not, in which case, just append and move on.
+			plugin = sys.modules[name]
 			if not silent:
 				print "*** Error: a module with the name " + name + " was already loaded!"
 				sys.exit(1)
+			else:
+				raise KeyError
+
 		except KeyError:
 			fp, pathname, description = imp.find_module(name, __path__)
 			try:
@@ -70,6 +76,10 @@ def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 						print "Error: deprecated makeCuts method is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
 					except AttributeError:
 						pass
+
+					# This is a cleaner way to do the same thing.
+					if hasattr(plugin, 'reset'):
+						print "Warning: deprecated reset function is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
 
 				# Complain if a plugin's input type is != what we expect.
 				try:
@@ -124,6 +134,7 @@ class PluginRunner:
 		# To preserve order and touch the fewest places, I will be lazy.
 		# We really should have a Plugin class.
 		self.plugins = plugins
+		self.resetMap = {}
 		self.isDeprecated = []
 		for plugin in self.plugins:
 			numAnalyzeArgs = len(inspect.getargspec(plugin.analyze).args)
@@ -140,6 +151,10 @@ class PluginRunner:
 	def setupPlugins(self, variables, isData):
 		for plugin in self.plugins:
 			variables = plugin.setup(variables, isData)
+
+		# From the variables collection, make a copy for reset purposes!
+		self.resetMap = copy.deepcopy(variables)
+
 		return variables
 
 	def analyzePlugins(self, event, variables, cuts, labels, isData):
@@ -169,6 +184,19 @@ class PluginRunner:
 		return variables, cuts, shouldDrop
 
 	def resetPlugins(self, variables):
+
+		# Let plugins call their own reset logic if they really want.
+		# Use inspect to test for the existence of the reset function
 		for plugin in self.plugins:
-			variables = plugin.reset(variables)
+			if hasattr(plugin, 'reset'):
+				variables = plugin.reset(variables)
+
+		# Now mass reset everything.
+		# Problem: this scribbles over the reset() calls of individual plugins.
+		# But I've decided I don't care about this, at least for the moment.
+		for key, value in variables.iteritems():
+			resetter = self.resetMap[key]
+			for i in xrange(len(value)):
+				variables[key][i] = resetter[i]
+
 		return variables
