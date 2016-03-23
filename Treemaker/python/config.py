@@ -6,6 +6,8 @@ import ConfigParser
 import os
 import sys
 
+from Treemaker.Treemaker import constants
+
 from Treemaker.Treemaker.dbsapi import constants as DBSConstants
 
 # Used so trees from multiple versions do not get hadd'd together.
@@ -75,7 +77,17 @@ class TreemakerConfig:
 		self.splitBy = self.parseOption(configParser, 'splitting', 'split_by', -1, 'int')
 		if self.splitBy != -1 and self.splitInto != -1:
 			print "Error: cannot set both split_into and split_by at the same time."
-		
+
+		# Parse source type options; this is an optional section.
+		try:
+			self.inputType = self.parseOption(configParser, 'input', 'input_type', constants.default_input_type)
+			self.sourceTreeName = self.parseOption(configParser, 'input', 'source_tree_name', '')
+			if self.inputType != 'Tree' and self.sourceTreeName != '':
+				print "Warning: source tree name specified, but Treemaker not running in tree mode."
+		except ConfigParser.NoSectionError:
+			self.inputType = constants.default_input_type
+			self.sourceTreeName = ""
+
 		# Parse any config options.
 		try:
 			for paramName, paramValue in configParser.items("parameters"):
@@ -102,7 +114,7 @@ def writeConfigFile(dataset, opts):
 	configParser.add_section('dataset')
 
 	# Dataset validation, if we are a das://dbs/DATASET form.
-	if "das://" in dataset or 'dbs://' in directory:
+	if "das://" in dataset or 'dbs://' in dataset:
 		try:
 			_, _, dasName = directory.partition("://")
 			dbs, _, dataset = dasName.partition(":")
@@ -111,7 +123,7 @@ def writeConfigFile(dataset, opts):
 				raise RuntimeError
 		except RuntimeError:
 			print "Error: dataset was specified using a DAS URL (das://), but was improperly formatted!"
-			print "Error: formatting should be 'das://instance/dataset'."
+			print "Error: formatting should be 'das://instance:dataset'."
 			sys.exit(1)
 
 	configParser.set('dataset', 'directory', dataset)
@@ -126,6 +138,15 @@ def writeConfigFile(dataset, opts):
 		sys.exit(1)
 	configParser.set('splitting', 'split_into', opts.splitInto)
 	configParser.set('splitting', 'split_by', opts.splitBy)
+
+	# Add a section on input type. If not present this defaults to Ntuple.
+	configParser.add_section('input')
+	inputType = opts.inputType
+	if not inputType in constants.input_types:
+		print "Error: invalid input format '" + inputType + "' specified!"
+		sys.exit(1)
+	configParser.set('input', 'input_type', opts.inputType)
+	configParser.set('input', 'source_tree_name', opts.sourceTreeName)
 
 	# Assume priorites are strictly increasing based on order in load file.	
 	configParser.add_section('plugins')

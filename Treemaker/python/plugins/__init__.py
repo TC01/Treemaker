@@ -7,6 +7,8 @@ import sys
 # an example in the Python imp documentation and then used it here:
 # http://bitbucket.org/TC01/hex in an unrelated project.
 
+from Treemaker.Treemaker import constants
+
 plugins = []
 
 ## Helper functions.
@@ -31,7 +33,7 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 						names.append(filename)
 	return names
 
-def loadPlugins(pluginNames, parameters={}, silent=False):
+def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 	global plugins
 	
 	# Get a list of all possible plugin names
@@ -43,6 +45,10 @@ def loadPlugins(pluginNames, parameters={}, silent=False):
 		print "Please rerun Treemaker with the -c [config name] option, where [config name]"
 		print "is a file containing newline-separated list of plugin names."
 		sys.exit(1)
+
+	# Decide what we're running over.
+	if inputType == "":
+		inputType = constants.default_input_type
 
 	# Now, use imp to load all the plugins we specified
 	for name in names:
@@ -64,6 +70,20 @@ def loadPlugins(pluginNames, parameters={}, silent=False):
 						print "Error: deprecated makeCuts method is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
 					except AttributeError:
 						pass
+
+				# Complain if a plugin's input type is != what we expect.
+				try:
+					if plugin.input_type != inputType:
+						print "Error: plugin " + name + " runs over input type '" + plugin.input_type + "', but we were asked to run over '" + inputType + "'!"
+						print "Ignoring this plugin."
+						continue
+				# This means we have the default input type.
+				except AttributeError:
+					if inputType != constants.default_input_type:
+						print "Error: plugin " + name + "had no input type specified!"
+						print "The default input type is '" + constants.default_input_type + "', but we were asked to run over '" + inputType + "'!"
+						print "Ignoring this plugin."
+						continue
 
 				plugin.parameters = parameters
 				pluginDict[name] = plugin
@@ -93,6 +113,10 @@ def loadPlugins(pluginNames, parameters={}, silent=False):
 
 	# Then return plugins.
 	return plugins
+
+# We *could* implement other plugin runners if necessary, but the default
+# one should actually be fine for trees!
+# He said, hopefully.
 
 class PluginRunner:
 	
@@ -148,4 +172,3 @@ class PluginRunner:
 		for plugin in self.plugins:
 			variables = plugin.reset(variables)
 		return variables
-

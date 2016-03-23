@@ -4,6 +4,11 @@ import array
 
 from Treemaker.Treemaker import cuts
 
+# Plugins don't need to declare their type if they run over an ntuple, but
+# this one will as an example!
+
+input_type = "Ntuple"
+
 def setup(variables, isData):
 	variables['weight'] = array.array('f', [1.0])
 	return variables

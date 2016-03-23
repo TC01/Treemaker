@@ -5,6 +5,7 @@ Command-line parser, now that that is shared between scripts.
 import optparse
 
 from Treemaker.Treemaker import config
+from Treemaker.Treemaker import constants
 
 def getParser():
 	parser = optparse.OptionParser()
@@ -37,5 +38,9 @@ def getConfigParser():
 	parser.add_option("-d", "--data", dest="data", action="store_true", help="If true, we are running on data.", default=False)
 	parser.add_option("-n", "--name", dest="name", help="The name of the output file, defaults to directory name of ntuples.", default=config.defaultFileName)
 	parser.add_option("-t", "--treename", dest="treename", help="The name of the output TTree object.", default=config.defaultTreeName)
+
+	# Input type options.
+	parser.add_option('-i', '--input-format', dest="inputType", help="The input format. Acceptable values include Tree and Ntuple.", default=constants.default_input_type)
+	parser.add_option('-s', '--source-tree', dest="sourceTreeName", help="Name of the ROOT Tree to run over, if input-format is Tree.", default="")
 
 	return parser
