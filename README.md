@@ -1,4 +1,4 @@
-Treemaker v1.1
+Treemaker v1.2
 --------------
 
 Treemaker is a generic, extensible piece of Python software for turning
