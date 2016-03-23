@@ -1,3 +1,4 @@
+import copy
 import imp
 import inspect
 import os
@@ -124,6 +125,7 @@ class PluginRunner:
 		# To preserve order and touch the fewest places, I will be lazy.
 		# We really should have a Plugin class.
 		self.plugins = plugins
+		self.resetMap = {}
 		self.isDeprecated = []
 		for plugin in self.plugins:
 			numAnalyzeArgs = len(inspect.getargspec(plugin.analyze).args)
@@ -140,6 +142,10 @@ class PluginRunner:
 	def setupPlugins(self, variables, isData):
 		for plugin in self.plugins:
 			variables = plugin.setup(variables, isData)
+
+		# From the variables collection, make a copy for reset purposes!
+		self.resetMap = copy.deepcopy(variables)
+
 		return variables
 
 	def analyzePlugins(self, event, variables, cuts, labels, isData):
@@ -169,6 +175,17 @@ class PluginRunner:
 		return variables, cuts, shouldDrop
 
 	def resetPlugins(self, variables):
+
+		# Let plugins call their own reset logic if they really want.
 		for plugin in self.plugins:
 			variables = plugin.reset(variables)
+
+		# Now mass reset everything.
+		# Problem: this scribbles over the reset() calls of individual plugins.
+		# But I've decided I don't care about this, at least for the moment.
+		for key, value in variables.iteritems():
+			resetter = self.resetMap[key]
+			for i in xrange(len(value)):
+				variables[key][i] = resetter[i]
+
 		return variables
