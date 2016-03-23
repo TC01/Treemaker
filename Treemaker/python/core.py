@@ -99,8 +99,7 @@ def runOverFile(treemakerConfig, ntuple, outputDir, treename, offset, data=False
 
 		# Set up branches for all variables declared by loaded plugins.
 		# Do this setup in sorted alphabetical order by variable name.
-		variables = {}
-		variables = runner.setupPlugins(variables, data)
+		variables = runner.setupPlugins({}, data)
 		sortedVarNames = sorted(variables)
 		for varName in sortedVarNames:
 			varArray = variables[varName]

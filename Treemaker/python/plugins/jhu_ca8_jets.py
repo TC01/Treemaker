@@ -50,6 +50,7 @@ class Jet:
 	def analyze(self, variables, labels):
 		"""	Runs the treemaking step. Labels is a dictionary containing already-
 		loaded handles."""
+
 		# Do the analysis step.
 		jetCollection = 'PrunedCA8'
 		if not self.data:
@@ -145,12 +146,11 @@ def analyze(event, variables, labels, isData, cutArray):
 
 	return variables, cutArray
 
-# Reset is now done for us!
-#def reset(variables):
-#	for jet in jets:
-#		variables = jet.reset(variables)
-#	variables['numjets'][0] = 0.0
-#	return variables
+# Reset is now done for us but this plugin requires it (sort of).
+def reset(variables):
+	for jet in jets:
+		variables = jet.reset(variables)
+	return variables
 
 def drop(event, variables, cutArray, labels, isData):
 	# Only keep events with numjets >= numJets (3).

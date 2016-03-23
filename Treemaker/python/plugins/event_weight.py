@@ -21,10 +21,6 @@ def analyze(event, variables, labels, isData, cutArray):
 		pass
 	return variables, cutArray
 
-def reset(variables):
-	variables['weight'][0] = 1.0
-	return variables
-
 def createCuts(cutArray):
 	return cutArray
 

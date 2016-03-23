@@ -10,8 +10,6 @@ import sys
 
 from Treemaker.Treemaker import constants
 
-plugins = []
-
 ## Helper functions.
 def getScriptLocation():
 	"""Helper function to get the location of a Python file."""
@@ -35,8 +33,8 @@ def getPossiblePluginNames(namesToLoad=[], location=defaultLocation):
 	return names
 
 def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
-	global plugins
-	
+	plugins = []
+
 	# Get a list of all possible plugin names
 	names = getPossiblePluginNames(pluginNames.keys())
 	pluginDict = {}
@@ -54,10 +52,17 @@ def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 	# Now, use imp to load all the plugins we specified
 	for name in names:
 		try:
-			test = sys.modules[name]
+
+			# If the plugin was already loaded, behavior depends on the silent flag.
+			# silent = False means this is the first time we're running (so warnings get printed, etc.)
+			# silent = True means it's not, in which case, just append and move on.
+			plugin = sys.modules[name]
 			if not silent:
 				print "*** Error: a module with the name " + name + " was already loaded!"
 				sys.exit(1)
+			else:
+				raise KeyError
+
 		except KeyError:
 			fp, pathname, description = imp.find_module(name, __path__)
 			try:
@@ -74,7 +79,7 @@ def loadPlugins(pluginNames, parameters={}, silent=False, inputType=""):
 
 					# This is a cleaner way to do the same thing.
 					if hasattr(plugin, 'reset'):
-						print "Error: deprecated reset function is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
+						print "Warning: deprecated reset function is used in plugin '" + name + "'. Please see https://github.com/TC01/Treemaker/wiki/Deprecations"
 
 				# Complain if a plugin's input type is != what we expect.
 				try:
