@@ -18,7 +18,10 @@ def getDASNtuples(directory):
 		print "Error: DBS instance " + dbs + " was not recognized!"
 		sys.exit(1)
 	rawNtuples = dasFileQuery.dasFileQuery(dataset, dbs)
-	ntuples = ["root://cmsxrootd.fnal.gov//" + ntuple for ntuple in rawNtuples]
+	try:
+		ntuples = ["root://cmsxrootd.fnal.gov//" + ntuple.encode("utf8") for ntuple in rawNtuples]
+	except UnicodeDecodeError:
+		print "Error retrieving dataset list from DAS, because of unicode conversion issues? This should never happen."
 	return ntuples, dataset
 
 def getXRDNtuples(directory):
