@@ -116,8 +116,8 @@ def writeConfigFile(dataset, opts):
 	# Dataset validation, if we are a das://dbs/DATASET form.
 	if "das://" in dataset or 'dbs://' in dataset:
 		try:
-			_, _, dasName = directory.partition("://")
-			dbs, _, dataset = dasName.partition(":")
+			_, _, dasName = dataset.partition("://")
+			dbs, _, actual_dataset = dasName.partition(":")
 			if not dbs in DBSConstants.instances:
 				print "Error: " + dbs + " is not a valid database instance in DAS!"
 				raise RuntimeError

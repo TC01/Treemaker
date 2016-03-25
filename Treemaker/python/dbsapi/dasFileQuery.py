@@ -5,7 +5,7 @@ import sys
 import json
 import das_client_fork as das_client
 
-def dasFileQuery(dataset, instance='prod/master'):
+def dasFileQuery(dataset, instance='prod/global'):
 	query   = 'dataset dataset=%s instance=%s' % (dataset, instance)
 	host    = 'https://cmsweb.cern.ch'      # default
 	idx     = 0                             # default
@@ -30,7 +30,7 @@ def dasFileQuery(dataset, instance='prod/master'):
 	else:
 		# expand the dataset name
 		dataset = jsondict['data'][0]['dataset'][0]['name']
-		query = 'file dataset=%s' % dataset
+		query = 'instance=%s file dataset=%s' % (instance, dataset)
 		jsondict = das_client.get_data(host, query, idx, limit, debug, thr, ckey, cert)
 		# parse the results in JSON format, and extract the list of files
 		files = sorted( f['file'][0]['name'] for f in jsondict['data'] )
