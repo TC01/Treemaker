@@ -10,13 +10,16 @@ def main():
 	parser.add_option('--split-into', dest='splitInto', help="Maximum number of jobs to run in each split.", default=-1, type=int)
 	parser.add_option('--split-by', dest='splitBy', help="Number of splits to make.", default=-1, type=int)
 
+	group = optparse.OptionGroup(parser, "Internals", "These give you a bit more granular control over the multiprocessing and splitting. Use with caution!")
+	group.add_option('--start-at', dest='startAt', help="Index of job to start at.", default=0, type=int)
+
 	(opts, args) = parser.parse_args()
 
 	if len(args) == 0:
 		print "Please provide a Python configuration file to run."
 
 	for job in args:
-		core.runMultiJob(job, opts.splitInto, opts.splitBy)
+		core.runMultiJob(job, opts.splitInto, opts.splitBy, opts.startAt)
 
 if __name__ == '__main__':
 	main()
