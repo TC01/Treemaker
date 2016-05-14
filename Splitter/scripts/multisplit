@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+import optparse
+
+# Import Splitter's core.
+from Treemaker.Splitter import core
+
+def main():
+	parser = optparse.OptionParser()
+	parser.add_option('--split-into', dest='splitInto', help="Maximum number of jobs to run in each split.", default=-1, type=int)
+	parser.add_option('--split-by', dest='splitBy', help="Number of splits to make.", default=-1, type=int)
+
+	(opts, args) = parser.parse_args()
+
+	if len(args) == 0:
+		print "Please provide a Python configuration file to run."
+
+	for job in args:
+		core.runMultiJob(job, opts.splitInto, opts.splitBy)
+
+if __name__ == '__main__':
+	main()

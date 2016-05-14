@@ -2,8 +2,10 @@
 # Splitter is a much-slimmed-down Treemaker that uses the same splitting logic.
 
 import os
+import multiprocessing
 import sys
 
+from Treemaker.Treemaker import core as tmcore
 from Treemaker.Treemaker import filelist
 
 def readConfig(jobfile):
@@ -20,7 +22,7 @@ def readConfig(jobfile):
 	# Return the configuration object.
 	return job
 
-def split(jobfile, splitInto, splitBy, index):
+def split(jobfile, splitInto, splitBy, index=-1):
 
 	# Read parameters from the configuraiton.
 	job = readConfig(jobfile)
@@ -37,6 +39,29 @@ def split(jobfile, splitInto, splitBy, index):
 	return job, splitNtuples, numJobs
 
 def runSplitJob(jobfile, splitInto, splitBy, index):
-	job, splitNtuples, numJobs = split(jobfile, splitInto, splitBy, index)
-	runstring = "Index" + str(index)
-	job.run(splitNtuples, runstring)
+	try:
+		job, splitNtuples, numJobs = split(jobfile, splitInto, splitBy, index)
+		runstring = ""
+		if index != -1:
+			runstring = "Index" + str(index)
+		job.run(splitNtuples, runstring)
+	except KeyboardInterrupt:
+		raise tmcore.KeyboardInterruptError()
+
+def runMultiJob(jobfile, splitInto, splitBy):
+	job, splitNtuples, numJobs = split(jobfile, splitInto, splitBy)
+
+	# XXX: debugging.
+	numJobs = 10
+
+	# Make the jobs via multiprocessing!
+	pool = multiprocessing.Pool()
+	results = []
+	for index in range(numJobs):
+		result = pool.apply_async(runSplitJob, (jobfile, splitInto, splitBy, index, ))
+		results.append(result)
+
+	pool.close()
+	pool.join()
+	for result in results:
+		result.get(timeout=tmcore.treemakerTimeout)
