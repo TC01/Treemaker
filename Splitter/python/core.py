@@ -51,9 +51,6 @@ def runSplitJob(jobfile, splitInto, splitBy, index):
 def runMultiJob(jobfile, splitInto, splitBy):
 	job, splitNtuples, numJobs = split(jobfile, splitInto, splitBy)
 
-	# XXX: debugging.
-	numJobs = 10
-
 	# Make the jobs via multiprocessing!
 	pool = multiprocessing.Pool()
 	results = []
