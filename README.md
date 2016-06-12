@@ -1,4 +1,4 @@
-Treemaker v1.2
+Treemaker v1.3
 --------------
 
 Treemaker is a generic, extensible piece of Python software for turning
@@ -6,14 +6,11 @@ Treemaker is a generic, extensible piece of Python software for turning
 into [ROOT](http://root.cern.ch/) ttrees, written by Ben Rosser as an
 undergraduate member of the [CMS collaboration](http://cms.cern.ch/) at CERN.
 
-The name is generic because I could not come up with a better one in a 
+The name is generic because the author could not come up with a better one in a 
 short amount of time, but also because it's appropriate. :)
 
-Currently, all documentation is available in this file. Some might be moved
-into a wiki on this git repository or to a github pages site as it grows
-in size.
-
-# Introduction:
+# Introduction
+### (By Ben Rosser, written originally for Treemaker 1.0)
 
 There are many reasons why you might want to do turn your trees into ntuples.
 
@@ -99,6 +96,8 @@ release.
 
 # Usage:
 
+## Using full Treemaker
+
 The general Treemaker workflow is something like this:
 
 1. Write plugins and put them in ```Treemaker/python/plugins```. The
@@ -120,6 +119,14 @@ automatically generate a config file.
 
 It can be slightly more complicated than that if you want to use job splitting
 or condor or anything slightly fancier. Consult the documentation for more.
+
+## Using lightweight Treemaker, Splitter
+
+If you do not want to write all of your analysis code from scratch using Treemaker,
+but the above sounds appealing, a lightweight form of Treemaker, "Splitter", is
+provided as of version 1.3. Setting up Splitter is as simple as writing a Python
+configuration file that knows how to run your jobs; for information on this,
+consult the wiki.
 
 # Credits:
 

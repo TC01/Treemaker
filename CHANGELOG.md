@@ -3,6 +3,16 @@
 Changelogs, derived from git history, for versions of Treemaker after
 the first official release, v1.0.
 
+### Treemaker v1.3
+
+* Wrote ```run-split-job``` script and the Splitter module, using
+Treemaker library, as a light-weight alternative to Treemaker that
+doesn't require you to rewrite your analysis code to take advantage of
+Treemaker features.
+
+* Wrote ```multisplit``` script that is capable of using Python multiprocessing
+to run split jobs simultaneously.
+
 ### Treemaker v1.2
 
 * Added support for running over a TTree in a (collection of) ROOT files,
