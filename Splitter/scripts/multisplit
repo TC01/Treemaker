@@ -12,6 +12,7 @@ def main():
 
 	group = optparse.OptionGroup(parser, "Internals", "These give you a bit more granular control over the multiprocessing and splitting. Use with caution!")
 	group.add_option('--start-at', dest='startAt', help="Index of job to start at.", default=0, type=int)
+	group.add_option('--stop-at', dest='stopAt', help="Index of job to stop at.", default=-1, type=int)
 
 	(opts, args) = parser.parse_args()
 
@@ -19,7 +20,7 @@ def main():
 		print "Please provide a Python configuration file to run."
 
 	for job in args:
-		core.runMultiJob(job, opts.splitInto, opts.splitBy, opts.startAt)
+		core.runMultiJob(job, opts.splitInto, opts.splitBy, opts.startAt, opts.stopAt)
 
 if __name__ == '__main__':
 	main()

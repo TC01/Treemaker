@@ -48,14 +48,16 @@ def runSplitJob(jobfile, splitInto, splitBy, index):
 	except KeyboardInterrupt:
 		raise tmcore.KeyboardInterruptError()
 
-def runMultiJob(jobfile, splitInto, splitBy, startAt=0):
+def runMultiJob(jobfile, splitInto, splitBy, startAt=0, stopAt=-1):
 	job, splitNtuples, numJobs = split(jobfile, splitInto, splitBy)
+	if stopAt == -1:
+		stopAt = numJobs
 
 	# Make the jobs via multiprocessing!
 	pool = multiprocessing.Pool()
 	results = []
 	# Start at wherever we're told to start at.
-	for index in range(startAt, numJobs):
+	for index in range(startAt, stopAt):
 		result = pool.apply_async(runSplitJob, (jobfile, splitInto, splitBy, index, ))
 		results.append(result)
 
