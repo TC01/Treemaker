@@ -132,7 +132,7 @@ consult the wiki.
 
 ## Developers
 
-* Ben Rosser <brosser3@jhu.edu>
+* Ben Rosser <rosser.bjr@gmail.com>
 
 ## Contributors: Code
 
